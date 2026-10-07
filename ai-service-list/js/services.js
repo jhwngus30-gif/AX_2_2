@@ -29,9 +29,9 @@ const PURPOSES = [
   { key: "slides",    label: "발표자료 만들기",      icon: "📊" },
   { key: "makevideo", label: "영상 만들기",          icon: "🎬" },
   { key: "subtitle",  label: "영상 자막 넣기",       icon: "💬" },
-  { key: "promo",     label: "홍보 이미지·카드뉴스", icon: "🖼️" },
+  { key: "promo",     label: "홍보 이미지", icon: "🖼️" },
   { key: "translate", label: "번역·내레이션",        icon: "🌐" },
-  { key: "build",     label: "웹사이트·앱 만들기",   icon: "🛠️" },
+  { key: "build",     label: "웹·앱 만들기",   icon: "🛠️" },
 ];
 
 const FREE_LEVELS = {
