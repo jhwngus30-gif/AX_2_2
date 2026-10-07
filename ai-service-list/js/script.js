@@ -8,7 +8,10 @@ const state = {
   purpose: null,
   freeLevel: "all",
   query: "",
+  compare: [],       // 비교에 담은 서비스 index (최대 3개, 필터를 바꿔도 유지)
 };
+
+const MAX_COMPARE = 3;
 
 const $ = (id) => document.getElementById(id);
 
@@ -40,6 +43,12 @@ function accessTags(howTo, short = true) {
   return howTo.access
     .map((a) => `<span class="tag tag-access ${a}">${ACCESS_LABELS[a][short ? "short" : "label"]}</span>`)
     .join("");
+}
+
+function commercialTag(c, short = true) {
+  if (!c) return "";
+  const info = COMMERCIAL_LEVELS[c.level];
+  return `<span class="tag tag-commercial ${c.level}">${short ? info.short : info.label}</span>`;
 }
 
 function listItems(items) {
@@ -126,6 +135,7 @@ function matches(service) {
 // ---------------- 카드 ----------------
 function cardHtml(service, index) {
   const cat = categoryMap[service.category];
+  const inCompare = state.compare.includes(index);
   const spec = service.specSummary
     ? `<div class="info-row spec"><span class="info-label">스펙</span><span>${escapeHtml(service.specSummary)}</span></div>`
     : "";
@@ -136,10 +146,16 @@ function cardHtml(service, index) {
         <span class="tag tag-category">${escapeHtml(cat.label)}</span>
         ${freeBadge(service.freeLevel)}
       </div>
-      <h3 class="card-name">${escapeHtml(service.name)}</h3>
+      <div class="card-name-row">
+        <h3 class="card-name">${escapeHtml(service.name)}</h3>
+        <button type="button" class="compare-toggle${inCompare ? " active" : ""}" data-compare="${index}" aria-pressed="${inCompare}">
+          <span class="check" aria-hidden="true"></span>비교
+        </button>
+      </div>
       <div class="card-meta">
         ${accessTags(service.howTo)}
         ${koreanTag(service.korean)}
+        ${commercialTag(service.commercial)}
       </div>
       <p class="card-desc">${escapeHtml(service.desc)}</p>
       <div class="card-info">
@@ -249,6 +265,7 @@ function openDetail(index) {
         ${freeBadge(s.freeLevel)}
         ${accessTags(s.howTo, false)}
         ${koreanTag(s.korean)}
+        ${commercialTag(s.commercial)}
       </div>
       <h2 class="modal-title" id="modalTitle">${escapeHtml(s.name)}</h2>
       <p class="modal-desc">${escapeHtml(s.desc)}</p>
@@ -275,6 +292,18 @@ function openDetail(index) {
     ${specs}
     ${creditTips}
 
+    ${
+      s.commercial
+        ? `<div class="modal-section">
+            <h3>상업적 이용</h3>
+            <p class="modal-highlight commercial ${s.commercial.level}">
+              <strong>${COMMERCIAL_LEVELS[s.commercial.level].label}</strong> · ${escapeHtml(s.commercial.note)}
+            </p>
+            <p class="howto-note">업무용·외부 공개용으로 쓸 때는 사용 전에 공식 약관을 꼭 확인하세요.</p>
+          </div>`
+        : ""
+    }
+
     <div class="modal-section">
       <h3>추천 용도</h3>
       <p>${escapeHtml(s.useCase)}</p>
@@ -289,6 +318,97 @@ function openDetail(index) {
   const modal = $("detailModal");
   modal.showModal();
   modal.scrollTop = 0;
+}
+
+// ---------------- 비교하기 ----------------
+function toggleCompare(index) {
+  const pos = state.compare.indexOf(index);
+  if (pos >= 0) {
+    state.compare.splice(pos, 1);
+  } else if (state.compare.length >= MAX_COMPARE) {
+    flashCompareMsg(`비교는 최대 ${MAX_COMPARE}개까지 담을 수 있어요`);
+    return;
+  } else {
+    state.compare.push(index);
+  }
+  renderCompareBar();
+  renderCards();
+}
+
+let msgTimer;
+function flashCompareMsg(text) {
+  $("compareMsg").textContent = text;
+  clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => ($("compareMsg").textContent = ""), 2000);
+}
+
+function renderCompareBar() {
+  const count = state.compare.length;
+  $("compareBar").hidden = count === 0;
+  document.body.classList.toggle("has-compare", count > 0);
+
+  $("compareItems").innerHTML =
+    state.compare
+      .map((i) => {
+        const s = services[i];
+        return `<span class="compare-chip" style="${catStyle(s.category)}">${escapeHtml(s.name)}
+          <button type="button" data-remove="${i}" aria-label="${escapeHtml(s.name)} 빼기">✕</button></span>`;
+      })
+      .join("") + `<span class="compare-count">${count}/${MAX_COMPARE}</span>`;
+
+  const btn = $("compareOpen");
+  btn.disabled = count < 2;
+  btn.textContent = count < 2 ? "1개 더 담아 주세요" : "비교하기";
+}
+
+function openCompare() {
+  const items = state.compare.map((i) => services[i]);
+  const dash = `<span class="muted">-</span>`;
+  const top2 = (arr) => `<ul>${listItems(arr.slice(0, 2))}</ul>`;
+
+  const rows = [
+    ["분야", (s) => `<span class="tag tag-category" style="${catStyle(s.category)}">${escapeHtml(categoryMap[s.category].label)}</span>`],
+    ["무료 활용도", (s) => freeBadge(s.freeLevel)],
+    ["무료 사용량", (s) => escapeHtml(s.freeAmount)],
+    ["유료 시작가", (s) => (s.paidFrom ? escapeHtml(s.paidFrom) : dash)],
+    ["상업적 이용", (s) => (s.commercial ? commercialTag(s.commercial, false) : dash)],
+    ["이용 방식", (s) => (s.howTo ? s.howTo.access.map((a) => ACCESS_LABELS[a].label).join(" · ") : dash)],
+    ["한국어", (s) => (s.korean ? KOREAN_LEVELS[s.korean].replace("한국어 ", "") : dash)],
+    ["장점", (s) => top2(s.pros)],
+    ["아쉬운 점", (s) => top2(s.cons)],
+    ["추천 용도", (s) => escapeHtml(s.useCase)],
+  ];
+
+  $("compareContent").innerHTML = `
+    <div class="compare-head">
+      <h2 class="modal-title" id="compareTitle">서비스 비교</h2>
+      <button type="button" class="modal-close" data-close aria-label="닫기">✕</button>
+    </div>
+    <p class="compare-hint">← 표를 옆으로 밀어서 비교해 보세요</p>
+    <div class="compare-scroll">
+      <table class="compare-table" style="--cols: ${items.length}">
+        <thead>
+          <tr>
+            <th scope="col"><span class="sr-only">항목</span></th>
+            ${items.map((s) => `<th scope="col" style="${catStyle(s.category)}">${escapeHtml(s.name)}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          ${rows
+            .map(([label, cell]) => `<tr><th scope="row">${label}</th>${items.map((s) => `<td>${cell(s)}</td>`).join("")}</tr>`)
+            .join("")}
+          <tr>
+            <th scope="row"></th>
+            ${items
+              .map((s) => `<td><a class="btn btn-primary" href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">바로가기 ↗</a></td>`)
+              .join("")}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="howto-note">"(조사)" 표시는 외부 자료 조사 값이에요. 요금은 사용 전에 공식 사이트에서 확인하세요.</p>`;
+
+  $("compareModal").showModal();
 }
 
 // 예시 프롬프트 복사 (파일로 열었을 때도 동작하도록 예비 방식 포함)
@@ -367,8 +487,31 @@ function bindEvents() {
   });
 
   $("cardGrid").addEventListener("click", (e) => {
+    const compareBtn = e.target.closest("[data-compare]");
+    if (compareBtn) {
+      toggleCompare(Number(compareBtn.dataset.compare));
+      return;
+    }
     const btn = e.target.closest("[data-detail]");
     if (btn) openDetail(Number(btn.dataset.detail));
+  });
+
+  $("compareItems").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-remove]");
+    if (btn) toggleCompare(Number(btn.dataset.remove));
+  });
+
+  $("compareClear").addEventListener("click", () => {
+    state.compare = [];
+    renderCompareBar();
+    renderCards();
+  });
+
+  $("compareOpen").addEventListener("click", openCompare);
+
+  const compareModal = $("compareModal");
+  compareModal.addEventListener("click", (e) => {
+    if (e.target.closest("[data-close]") || e.target === compareModal) compareModal.close();
   });
 
   const modal = $("detailModal");
@@ -391,3 +534,4 @@ renderPurposes();
 renderFreeButtons();
 bindEvents();
 refresh();
+renderCompareBar();

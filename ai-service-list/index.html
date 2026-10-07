@@ -68,6 +68,23 @@
     </div>
   </footer>
 
+  <!-- 비교 바 (1개 이상 담았을 때만 표시) -->
+  <div class="compare-bar" id="compareBar" hidden>
+    <div class="compare-bar-inner container">
+      <div class="compare-items" id="compareItems"></div>
+      <span class="compare-msg" id="compareMsg" aria-live="polite"></span>
+      <div class="compare-actions">
+        <button type="button" class="btn-text" id="compareClear">비우기</button>
+        <button type="button" class="btn btn-primary" id="compareOpen">비교하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 비교 팝업 -->
+  <dialog id="compareModal" class="modal modal-wide" aria-labelledby="compareTitle">
+    <div class="modal-inner" id="compareContent"></div>
+  </dialog>
+
   <!-- 자세히 보기 팝업 -->
   <dialog id="detailModal" class="modal" aria-labelledby="modalTitle">
     <div class="modal-inner" id="modalContent"></div>
