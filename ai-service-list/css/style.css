@@ -347,7 +347,7 @@ button { font-family: inherit; cursor: pointer; }
 /* subgrid로 같은 줄 카드끼리 제목·설명·정보·버튼 위치를 맞춤 */
 .card {
   display: grid;
-  grid-row: span 5;
+  grid-row: span 6;
   grid-template-rows: subgrid;
   row-gap: 0;
   padding: 22px;
@@ -390,19 +390,29 @@ button { font-family: inherit; cursor: pointer; }
 .badge-paid   { background: var(--free-paid-bg);   color: var(--free-paid-text); }
 .badge .dot   { width: 7px; height: 7px; }
 
-.card-name-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
 .card-name {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 1.2rem;
   font-weight: 800;
 }
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.tag-access {
+  padding: 2px 8px;
+  background: #F3F0FA;
+  color: var(--text-sub);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.tag-access.install { background: #FFF1E6; color: #A9542A; }
 
 .tag-korean {
   padding: 2px 8px;
@@ -657,6 +667,109 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 .modal-footer .btn { flex: 0 0 auto; padding: 12px 28px; }
+
+/* 시작하는 방법 */
+.howto {
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: #F6F3FF;
+}
+
+.howto-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+}
+
+.howto-meta div { display: flex; gap: 6px; }
+.howto-meta dt { font-weight: 700; }
+.howto-meta dd { margin: 0; color: var(--text-sub); }
+
+.steps {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps li {
+  position: relative;
+  margin-bottom: 8px;
+  padding-left: 34px;
+  font-size: 0.93rem;
+  counter-increment: step;
+}
+
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 24px;
+  text-align: center;
+}
+
+.first-try {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.first-try h4 { margin: 0 0 4px; font-size: 0.92rem; }
+.first-try > p { margin: 0; font-size: 0.92rem; }
+
+.prompt-box {
+  position: relative;
+  margin-top: 12px;
+  padding: 12px 70px 12px 14px;
+  border: 1.5px dashed #D9D2F5;
+  border-radius: 10px;
+  background: #FCFBFF;
+}
+
+.prompt-label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.prompt-text {
+  margin: 0;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.copy-btn:hover { background: #E2DBFF; }
+
+.howto-note {
+  margin: 10px 0 0;
+  color: var(--text-sub);
+  font-size: 0.78rem;
+}
 
 /* ---------------- 푸터 ---------------- */
 .footer {

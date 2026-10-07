@@ -35,6 +35,13 @@ function koreanTag(level) {
   return `<span class="tag tag-korean ${level}">${KOREAN_LEVELS[level]}</span>`;
 }
 
+function accessTags(howTo, short = true) {
+  if (!howTo) return "";
+  return howTo.access
+    .map((a) => `<span class="tag tag-access ${a}">${ACCESS_LABELS[a][short ? "short" : "label"]}</span>`)
+    .join("");
+}
+
 function listItems(items) {
   return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
@@ -129,8 +136,9 @@ function cardHtml(service, index) {
         <span class="tag tag-category">${escapeHtml(cat.label)}</span>
         ${freeBadge(service.freeLevel)}
       </div>
-      <div class="card-name-row">
-        <h3 class="card-name">${escapeHtml(service.name)}</h3>
+      <h3 class="card-name">${escapeHtml(service.name)}</h3>
+      <div class="card-meta">
+        ${accessTags(service.howTo)}
         ${koreanTag(service.korean)}
       </div>
       <p class="card-desc">${escapeHtml(service.desc)}</p>
@@ -208,11 +216,38 @@ function openDetail(index) {
     ? `<div class="modal-section box tips"><h3>크레딧·무료 사용량 아끼는 법</h3><ul>${listItems(s.creditTips)}</ul></div>`
     : "";
 
+  const h = s.howTo;
+  const howTo = h
+    ? `<div class="modal-section howto">
+        <h3>시작하는 방법</h3>
+        <dl class="howto-meta">
+          <div><dt>이용 방식</dt><dd>${h.access.map((a) => ACCESS_LABELS[a].label).join(" · ")}</dd></div>
+          <div><dt>가입</dt><dd>${escapeHtml(h.signup)}</dd></div>
+        </dl>
+        <ol class="steps">${listItems(h.steps)}</ol>
+        <div class="first-try">
+          <h4>처음 해보기 좋은 작업</h4>
+          <p>${escapeHtml(h.firstTry)}</p>
+          ${
+            h.prompt
+              ? `<div class="prompt-box">
+                  <span class="prompt-label">예시 프롬프트</span>
+                  <p class="prompt-text">${escapeHtml(h.prompt)}</p>
+                  <button type="button" class="copy-btn" data-copy="${escapeHtml(h.prompt)}">복사</button>
+                </div>`
+              : ""
+          }
+        </div>
+        <p class="howto-note">공식 사이트 기준으로 정리한 흐름이에요 (조사, 2026.10). 메뉴 이름은 바뀔 수 있어요.</p>
+      </div>`
+    : "";
+
   $("modalContent").innerHTML = `
     <div class="modal-head" style="${catStyle(s.category)}">
       <div class="card-top">
         <span class="tag tag-category" style="background: rgba(255,255,255,0.75);">${escapeHtml(cat.label)}</span>
         ${freeBadge(s.freeLevel)}
+        ${accessTags(s.howTo, false)}
         ${koreanTag(s.korean)}
       </div>
       <h2 class="modal-title" id="modalTitle">${escapeHtml(s.name)}</h2>
@@ -245,6 +280,8 @@ function openDetail(index) {
       <p>${escapeHtml(s.useCase)}</p>
     </div>
 
+    ${howTo}
+
     <div class="modal-footer">
       <a class="btn btn-primary" href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">바로가기 ↗</a>
     </div>`;
@@ -252,6 +289,26 @@ function openDetail(index) {
   const modal = $("detailModal");
   modal.showModal();
   modal.scrollTop = 0;
+}
+
+// 예시 프롬프트 복사 (파일로 열었을 때도 동작하도록 예비 방식 포함)
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  }
+  fallbackCopy(text);
+  return Promise.resolve();
+}
+
+function fallbackCopy(text) {
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.style.position = "fixed";
+  area.style.opacity = "0";
+  document.body.appendChild(area);
+  area.select();
+  document.execCommand("copy");
+  area.remove();
 }
 
 // ---------------- 이벤트 ----------------
@@ -316,6 +373,14 @@ function bindEvents() {
 
   const modal = $("detailModal");
   modal.addEventListener("click", (e) => {
+    const copyBtn = e.target.closest("[data-copy]");
+    if (copyBtn) {
+      copyText(copyBtn.dataset.copy).then(() => {
+        copyBtn.textContent = "복사됨 ✓";
+        setTimeout(() => (copyBtn.textContent = "복사"), 1500);
+      });
+      return;
+    }
     // 닫기 버튼 또는 바깥(배경) 클릭 시 닫기
     if (e.target.closest("[data-close]") || e.target === modal) modal.close();
   });
