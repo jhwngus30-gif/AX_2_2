@@ -6,6 +6,9 @@
 // freeLevel : "enough"(무료로 충분) | "taste"(무료는 맛보기) | "paid"(유료 필수)
 // korean    : "good"(좋음) | "normal"(보통) | "weak"(약함) | 생략하면 표시 안 함
 // purposes  : 아래 PURPOSES의 key (목적으로 찾기에 연결)
+// paidFrom  : 유료 시작가 한 줄 (비교표에 사용)
+// commercial: 상업적 이용 (콘텐츠 분야만) { level, note }
+//   level    : "ok"(가능) | "cond"(조건부 가능) | "paid"(유료만 가능) | "check"(확인 필요)
 // howTo     : 시작하는 방법
 //   access   : "web"(웹에서 바로) | "install"(프로그램 설치) | "app"(모바일 앱)
 //   signup   : 가입 방법 / steps : 단계 3~4개 / firstTry : 처음 해보기 좋은 작업
@@ -42,6 +45,13 @@ const FREE_LEVELS = {
   enough: { label: "무료로 충분",   emoji: "🟢" },
   taste:  { label: "무료는 맛보기", emoji: "🟡" },
   paid:   { label: "유료 필수",     emoji: "🔴" },
+};
+
+const COMMERCIAL_LEVELS = {
+  ok:    { label: "상업적 이용 가능", short: "상업용 가능" },
+  cond:  { label: "조건부 가능",     short: "상업용 조건부" },
+  paid:  { label: "유료만 가능",     short: "상업용 유료만" },
+  check: { label: "확인 필요",       short: "상업용 확인 필요" },
 };
 
 // label: 팝업에 쓰는 이름 / short: 카드에 쓰는 짧은 이름
@@ -96,6 +106,8 @@ const services = [
       ["워터마크", "무료·Pro에 'Made with Veo' 표시, Ultra에서 제거 (조사)"],
       ["상업적 이용", "요금제별 이용 조건 확인 필요"],
     ],
+    paidFrom: "월 $19.99 (Google AI Pro)",
+    commercial: { level: "check", note: "무료 영상에는 'Made with Veo' 워터마크가 붙고, 상업적 이용 권리는 유료 플랜 기준이라는 자료가 많음 (조사)" },
     howTo: {
       access: ["web"],
       signup: "Google 계정",
@@ -145,6 +157,8 @@ const services = [
       ["워터마크", "무료 영상에는 있음"],
       ["상업적 이용", "무료 플랜은 불가 (조사)"],
     ],
+    paidFrom: "월 $6.99 (Standard)",
+    commercial: { level: "paid", note: "무료 플랜 영상은 워터마크가 붙고 상업적 이용 불가 (조사)" },
     howTo: {
       access: ["web", "app"],
       signup: "Google 계정 또는 이메일",
@@ -195,6 +209,8 @@ const services = [
       ["자동 자막", "무료는 월 횟수 제한"],
       ["유료 내보내기", "4K·HDR (조사)"],
     ],
+    paidFrom: "월 $19.99 (Pro, 조사)",
+    commercial: { level: "cond", note: "내가 찍은 영상 편집은 가능하지만, 내장 음악과 대부분의 템플릿은 상업적 이용이 제한됨 (조사)" },
     howTo: {
       access: ["web", "install", "app"],
       signup: "Google·TikTok 계정 또는 이메일",
@@ -241,6 +257,8 @@ const services = [
       ["워터마크", "일부 기능 사용 시 표시, 출처 표기 신청 시 제거 가능 (조사)"],
       ["자동 자막", "월 200 크레딧 안에서, 1분 단위 차감"],
     ],
+    paidFrom: "라이트 요금제 (가격은 공식 사이트 확인)",
+    commercial: { level: "cond", note: "AI 목소리 등 결과물은 상업적 이용 가능, 무료 플랜은 일부 기능에 워터마크 (조사)" },
     howTo: {
       access: ["install"],
       signup: "이메일 또는 Google 계정",
@@ -289,6 +307,7 @@ const services = [
       "테스트 실행도 크레딧이 들어가니 소량 데이터로 먼저 확인하기",
       "실행 간격을 너무 짧게 두지 않기 (15분마다 돌면 하루 96회 실행)",
     ],
+    paidFrom: "월 $9 (Core, 연간 결제)",
     howTo: {
       access: ["web"],
       signup: "Google 계정 또는 이메일",
@@ -333,6 +352,7 @@ const services = [
       "테스트할 때는 가벼운 모델을 선택하기 (상위 모델은 1회에 크레딧이 훨씬 많이 듦)",
       "자신의 AI API 키를 연결하면 기본 크레딧을 아낄 수 있음",
     ],
+    paidFrom: "월 $59 (Professional)",
     howTo: {
       access: ["web"],
       signup: "Google·GitHub 계정 또는 이메일 (직접 설치도 가능)",
@@ -375,6 +395,7 @@ const services = [
     creditTips: [
       "실행 1회 단위 과금이라, 여러 단계를 하나의 워크플로로 묶을수록 유리함",
     ],
+    paidFrom: "월 €20 (Starter, 연간 결제)",
     howTo: {
       access: ["web", "install"],
       signup: "이메일 (클라우드) / 직접 설치는 가입 불필요",
@@ -408,6 +429,7 @@ const services = [
     creditTips: [
       "간단한 질문은 기본 검색으로, 여러 출처 비교가 필요한 질문에만 Pro 검색 쓰기",
     ],
+    paidFrom: "월 $20 (Pro, 조사)",
     howTo: {
       access: ["web", "app"],
       signup: "가입 없이 사용 가능 (기록 저장은 Google·Apple 계정)",
@@ -444,6 +466,7 @@ const services = [
     creditTips: [
       "음성 요약은 하루 3회라 자료를 다 넣은 뒤 마지막에 한 번 만들기",
     ],
+    paidFrom: "월 $7.99 (Google AI Plus에 포함, 조사)",
     howTo: {
       access: ["web", "app"],
       signup: "Google 계정",
@@ -482,6 +505,7 @@ const services = [
     creditTips: [
       "파일 업로드는 하루 1회라, 여러 논문은 하나의 PDF로 묶어서 올리기",
     ],
+    paidFrom: "월 $17.99 (Pro, 조사)",
     howTo: {
       access: ["web", "app"],
       signup: "Google·Apple 계정 또는 이메일",
@@ -516,6 +540,7 @@ const services = [
       "Google AI Pro: $19.99/월 · 하루 최대 20회 (조사)",
     ],
     creditTips: ["횟수가 제한되므로 조사 계획 단계에서 범위를 충분히 다듬은 뒤 시작하기"],
+    paidFrom: "월 $19.99 (Google AI Pro, 조사)",
     howTo: {
       access: ["web", "app"],
       signup: "Google 계정",
@@ -553,6 +578,7 @@ const services = [
       "Pro: 월 $10 / Deep: 월 $45 · 연간 결제 할인, 학생 40% 할인 (조사)",
     ],
     creditTips: ["'~은 효과가 있는가?'처럼 예/아니오 질문으로 바꿔 물어야 기능을 제대로 활용 가능"],
+    paidFrom: "월 $10 (Pro, 조사)",
     howTo: {
       access: ["web"],
       signup: "Google 계정 또는 이메일",
@@ -583,6 +609,7 @@ const services = [
       "Plus: 월 $12 / Pro: 월 $49 (조사)",
     ],
     creditTips: ["비교할 항목(연구 방법, 대상 수, 결과 등)을 미리 정해 두고 한 번에 추출하기"],
+    paidFrom: "월 $12 (Plus, 조사)",
     howTo: {
       access: ["web"],
       signup: "Google 계정 또는 이메일",
@@ -612,6 +639,8 @@ const services = [
     price: [
       "무료 (Google Labs 실험 서비스, 추후 바뀔 수 있음, 조사)",
     ],
+    paidFrom: "유료 요금제 없음 (무료)",
+    commercial: { level: "ok", note: "만든 디자인은 상업적으로 사용 가능 (조사)" },
     howTo: {
       access: ["web"],
       signup: "Google 계정",
@@ -644,6 +673,8 @@ const services = [
       "별도 요금 없음, Claude 구독에 포함 (조사)",
       "Pro: 월 $20 / Max: 월 $100~$200 / Team: 1인 월 $30 (5인 이상) (조사)",
     ],
+    paidFrom: "월 $20 (Claude Pro, 조사)",
+    commercial: { level: "ok", note: "유료 구독 서비스이며, 만든 결과물은 상업적으로 사용 가능 (조사)" },
     howTo: {
       access: ["web"],
       signup: "Claude 계정 (Pro 이상 구독)",
@@ -673,6 +704,8 @@ const services = [
       "Team: 1인 월 $30 / Business: 1인 월 $100 (조사)",
     ],
     creditTips: ["처음 요청에 'HTML·CSS·JavaScript로'를 명시해 다시 만드는 횟수 줄이기"],
+    paidFrom: "1인 월 $30 (Team, 조사)",
+    commercial: { level: "ok", note: "생성된 코드는 내 소유로 상업적 이용 가능, 무료 배포 사이트에는 워터마크 (조사)" },
     howTo: {
       access: ["web"],
       signup: "Vercel 계정 (GitHub·Google 연동 가능)",
@@ -708,6 +741,8 @@ const services = [
     creditTips: [
       "무료는 파일 3개까지라, 페이지를 나누지 말고 한 파일 안에 프레임으로 정리하기",
     ],
+    paidFrom: "월 $16 (Professional Full 좌석, 조사)",
+    commercial: { level: "ok", note: "직접 만든 디자인은 상업적 이용 가능, 유료 폰트·플러그인 라이선스는 따로 확인 (조사)" },
     howTo: {
       access: ["web", "install"],
       signup: "Google 계정 또는 이메일",
@@ -736,6 +771,8 @@ const services = [
       "무료: 기본 기능 + AI 월 50회 (조사)",
       "Pro: 월 ₩9,900 · AI 월 500회, 배경 제거 무제한 (조사)",
     ],
+    paidFrom: "월 ₩9,900 (Pro)",
+    commercial: { level: "cond", note: "무료 소재도 상업적 이용 가능, 단 소재를 그대로 되팔 수 없고 직접 편집해야 함 (조사)" },
     howTo: {
       access: ["web", "app"],
       signup: "Google·네이버·카카오 계정 또는 이메일",
@@ -763,6 +800,8 @@ const services = [
       "무료: framer.website 주소로 공개 (조사)",
       "Basic: 월 $10 (내 도메인 연결) / Pro: 월 $30 (조사)",
     ],
+    paidFrom: "월 $10 (Basic, 조사)",
+    commercial: { level: "paid", note: "무료 플랜은 비상업용, 상업용 사이트는 Basic 이상 필요 (조사)" },
     howTo: {
       access: ["web", "install"],
       signup: "Google 계정 또는 이메일",
@@ -801,6 +840,8 @@ const services = [
       "커뮤니티 피드에서 비슷한 결과물의 프롬프트를 먼저 참고하면 생성 횟수를 아낄 수 있음",
       "넣을 글자는 영어로, 따옴표로 묶어서 지정하기",
     ],
+    paidFrom: "월 $8 (Basic)",
+    commercial: { level: "paid", note: "무료 이미지는 개인·비상업용이고 공개 갤러리에 노출됨, 상업적 이용은 유료 (조사)" },
     howTo: {
       access: ["web", "app"],
       signup: "Google 계정",
@@ -835,6 +876,8 @@ const services = [
       "Pro: 월 9,900원 (연간 99,000원) · AI 월 500회, 배경 제거 무제한 (조사)",
     ],
     creditTips: ["AI 생성은 소량 크레딧이므로, 무료 템플릿으로 틀을 먼저 잡고 꼭 필요한 부분만 AI로 생성하기"],
+    paidFrom: "월 ₩9,900 (Pro)",
+    commercial: { level: "cond", note: "AI 이미지도 상업적 이용 가능, 단 그대로 쓰지 말고 편집하고 SNS 게시 시 AI 생성 표시 필요 (조사)" },
     howTo: {
       access: ["web", "app"],
       signup: "Google·네이버·카카오 계정 또는 이메일",
@@ -870,6 +913,8 @@ const services = [
       "이미지 1장(4장 묶음)에 Fast 시간 약 1분이 들어감 → Basic은 약 200회 생성 (조사)",
       "Standard 이상은 Relax 모드로 느리지만 무제한 생성 가능",
     ],
+    paidFrom: "월 $10 (Basic)",
+    commercial: { level: "ok", note: "유료 구독이면 상업적 이용 가능, 연 매출 100만 달러 이상 회사는 Pro 이상 필요 (조사)" },
     howTo: {
       access: ["web"],
       signup: "Google 또는 Discord 계정 + 유료 구독",
@@ -910,6 +955,7 @@ const services = [
       "개인용 유료 요금제 없음 · Lite·Standard는 기업용 (조사)",
     ],
     creditTips: ["데이터 수집에 동의하면 무료 시간이 최대 600분까지 늘어남 (회의 내용 보안은 확인 후 결정)"],
+    paidFrom: "개인용 유료 요금제 없음 (조사)",
     howTo: {
       access: ["web", "app"],
       signup: "네이버 계정",
@@ -943,6 +989,7 @@ const services = [
     ],
     price: ["무료: 매월 1,000 크레딧 (약 4시간 상당)", "Pro: 월 11,900원부터"],
     creditTips: ["녹음 앞뒤의 불필요한 구간을 잘라내고 올리면 크레딧을 아낄 수 있음"],
+    paidFrom: "월 11,900원 (Pro)",
     howTo: {
       access: ["web", "app"],
       signup: "Google·카카오·네이버 계정",
@@ -975,6 +1022,7 @@ const services = [
       "Basic 무료: 매월 300분 (1회 미팅당 최대 30분)",
       "Pro: 연간 결제 시 월 $8.33 / 월간 결제 시 $16.99",
     ],
+    paidFrom: "월 $8.33 (Pro, 연간 결제)",
     howTo: {
       access: ["web", "app"],
       signup: "Google·Microsoft 계정",
@@ -1005,6 +1053,8 @@ const services = [
       "무료: 기본 템플릿 + AI 월 50회 (조사)",
       "Pro: 월간 ₩9,900 · 프리미엄 템플릿·요소, AI 월 500회 (조사)",
     ],
+    paidFrom: "월 ₩9,900 (Pro)",
+    commercial: { level: "cond", note: "무료 템플릿도 상업적 이용 가능, 단 소재를 그대로 되팔 수 없음 (조사)" },
     howTo: {
       access: ["web", "app"],
       signup: "Google·네이버·카카오 계정 또는 이메일",
@@ -1036,6 +1086,8 @@ const services = [
       "무료 크레딧은 다시 충전되지 않으니, 목차와 핵심 내용을 미리 정리해서 한 번에 넣기",
       "AI로 다시 만들기보다 직접 수정하면 크레딧이 들지 않음",
     ],
+    paidFrom: "월 $12 (Plus)",
+    commercial: { level: "cond", note: "무료로 만든 자료에는 'Made with Gamma' 표시가 붙음, Plus 이상에서 제거 (조사)" },
     howTo: {
       access: ["web"],
       signup: "Google 계정 또는 이메일",
@@ -1071,6 +1123,8 @@ const services = [
       "유료: Individual 월 $10.49 · 연간 결제 시 Starter 월 $8.74부터 (조사)",
     ],
     creditTips: ["문서 번역 횟수가 제한되므로, 짧은 글은 텍스트 창에 붙여 넣어 번역하기"],
+    paidFrom: "월 $10.49 (Individual)",
+    commercial: { level: "check", note: "번역 결과 사용 조건은 약관 확인 필요, 무료 버전은 입력 내용이 저장·학습될 수 있어 업무 문서는 Pro 권장" },
     howTo: {
       access: ["web", "install", "app"],
       signup: "가입 없이 사용 가능 (문서 번역은 로그인)",
@@ -1099,6 +1153,8 @@ const services = [
       "무료: 텍스트·이미지·음성 번역",
       "Plus: 월 ₩13,000부터 · 문서·이미지 번역 횟수와 팀 기능에 따라 상위 요금제 있음 (조사)",
     ],
+    paidFrom: "월 ₩13,000 (Plus Basic)",
+    commercial: { level: "check", note: "번역 결과의 상업적 이용 조건은 공식 약관 확인 필요" },
     howTo: {
       access: ["web", "app"],
       signup: "가입 없이 사용 가능 (네이버 계정 로그인 시 기록 저장)",
@@ -1134,6 +1190,8 @@ const services = [
       "Creator: 월 $22 (첫 달 $11 할인가) · 121,000 크레딧 (조사)",
     ],
     creditTips: ["글자 수 단위로 사용량이 줄어드니, 짧은 문장으로 목소리·톤을 먼저 테스트한 뒤 전체 원고 생성하기"],
+    paidFrom: "월 $6 (Starter, 조사)",
+    commercial: { level: "paid", note: "무료 플랜은 상업적 이용 불가 (출처 표기 필요), Starter부터 가능 (조사)" },
     howTo: {
       access: ["web", "app"],
       signup: "Google 계정 또는 이메일",
@@ -1175,6 +1233,7 @@ const services = [
       "요청을 여러 번 나누지 말고, 범위·출처 조건·결과 형식을 한 번에 구체적으로 적기",
       "결과의 수치는 출처별 정의와 연도가 다를 수 있으니 원문을 꼭 확인하기",
     ],
+    paidFrom: "월 $20 (첫 3개월 $10)",
     howTo: {
       access: ["web", "app"],
       signup: "Google·Apple 계정 또는 이메일",
@@ -1216,6 +1275,7 @@ const services = [
       "3단계 (월 125,000 크레딧): 월 $249.99",
     ],
     creditTips: ["단계별로 정보를 물어보니, 필요한 데이터·항목을 미리 준비해 두고 바로 답하기"],
+    paidFrom: "월 $24.99",
     howTo: {
       access: ["web", "app"],
       signup: "Google·Apple 계정 또는 이메일",
@@ -1254,6 +1314,7 @@ const services = [
       "Pro: 월 $20 / Pro+: 월 $60 / Ultra: 월 $200",
     ],
     creditTips: ["무료 요청이 제한되므로, 수정할 파일과 원하는 결과를 한 번에 구체적으로 지시하기"],
+    paidFrom: "월 $20 (Pro)",
     howTo: {
       access: ["install"],
       signup: "Google·GitHub 계정 또는 이메일",
@@ -1291,6 +1352,7 @@ const services = [
       "Pro: 월 $20 / Teams: 월 $80 / Max: 월 $200",
     ],
     creditTips: ["에이전트 작업 횟수가 적으므로 간단한 수정은 자동완성으로 처리하고, 큰 작업만 에이전트에 맡기기"],
+    paidFrom: "월 $20 (Pro)",
     howTo: {
       access: ["install"],
       signup: "Google·GitHub 계정 또는 이메일",
