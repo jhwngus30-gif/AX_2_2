@@ -1,11 +1,12 @@
 // =========================================================
-// AI 툴 가이드 - 필터 · 검색 · 팝업
+// AI 툴 가이드 - 탭 · 필터 · 검색 · 팝업
 // =========================================================
 
 const state = {
+  tab: "category",   // "category" | "purpose"
   category: "all",
-  freeLevel: "all",
   purpose: null,
+  freeLevel: "all",
   query: "",
 };
 
@@ -26,8 +27,7 @@ function catStyle(key) {
 }
 
 function freeBadge(level) {
-  const info = FREE_LEVELS[level];
-  return `<span class="tag badge-${level}">${info.emoji} ${info.label}</span>`;
+  return `<span class="tag badge badge-${level}"><i class="dot"></i>${FREE_LEVELS[level].label}</span>`;
 }
 
 function koreanTag(level) {
@@ -39,76 +39,88 @@ function listItems(items) {
   return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
 
-// ---------------- 필터 버튼 그리기 ----------------
+function isFiltered() {
+  return state.category !== "all" || state.purpose || state.freeLevel !== "all" || state.query;
+}
+
+// ---------------- 탭 / 필터 버튼 그리기 ----------------
+function renderCategoryButtons() {
+  const items = [{ key: "all", label: "전체" }, ...CATEGORIES.map((c) => ({ key: c.key, label: c.short }))];
+  $("categoryList").innerHTML = items
+    .map((c) => {
+      const style = c.key === "all" ? "" : `style="${catStyle(c.key)}"`;
+      return `<button type="button" class="cat-btn" data-category="${c.key}" ${style}>${escapeHtml(c.label)}</button>`;
+    })
+    .join("");
+}
+
 function renderPurposes() {
-  $("purposeList").innerHTML = PURPOSES.map(
-    (p) => `
+  $("purposeList").innerHTML = PURPOSES.map((p) => {
+    const names = services.filter((s) => (s.purposes || []).includes(p.key)).map((s) => s.name);
+    const unique = [...new Set(names)];
+    return `
       <button type="button" class="purpose-btn" data-purpose="${p.key}" aria-pressed="false">
-        <span class="purpose-icon" aria-hidden="true">${p.icon}</span>${escapeHtml(p.label)}
-      </button>`
-  ).join("");
+        <span class="purpose-label">${escapeHtml(p.label)}</span>
+        <span class="purpose-sub">${escapeHtml(unique.join(" · "))}</span>
+      </button>`;
+  }).join("");
 }
 
-function renderCategoryChips() {
-  const chips = [{ key: "all", label: "전체" }, ...CATEGORIES.map((c) => ({ key: c.key, label: c.short }))];
-  $("categoryList").innerHTML = chips
+function renderFreeButtons() {
+  const items = [{ key: "all", label: "전체" }, ...Object.entries(FREE_LEVELS).map(([key, v]) => ({ key, label: v.label }))];
+  $("freeList").innerHTML = items
     .map((c) => {
-      const style = c.key === "all" ? "" : `style="--chip-bg: var(--c-${c.key}); --chip-text: var(--t-${c.key});"`;
-      return `<button type="button" class="chip" data-category="${c.key}" ${style}>${escapeHtml(c.label)}</button>`;
+      const dot = c.key === "all" ? "" : `<i class="dot dot-${c.key}"></i>`;
+      return `<button type="button" class="seg-btn" data-free="${c.key}">${dot}${escapeHtml(c.label)}</button>`;
     })
     .join("");
 }
 
-function renderFreeChips() {
-  const chips = [{ key: "all", label: "전체" }, ...Object.entries(FREE_LEVELS).map(([key, v]) => ({ key, label: `${v.emoji} ${v.label}` }))];
-  $("freeList").innerHTML = chips
-    .map((c) => {
-      const style = c.key === "all" ? "" : `style="--chip-bg: var(--free-${c.key}-bg); --chip-text: var(--free-${c.key}-text);"`;
-      return `<button type="button" class="chip" data-free="${c.key}" ${style}>${escapeHtml(c.label)}</button>`;
-    })
-    .join("");
-}
+function updateActive() {
+  document.querySelectorAll("[data-tab]").forEach((btn) => {
+    const active = btn.dataset.tab === state.tab;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-selected", String(active));
+  });
+  $("panel-category").hidden = state.tab !== "category";
+  $("panel-purpose").hidden = state.tab !== "purpose";
 
-function updateActiveButtons() {
   document.querySelectorAll("[data-category]").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.category === state.category);
-  });
-  document.querySelectorAll("[data-free]").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.free === state.freeLevel);
   });
   document.querySelectorAll("[data-purpose]").forEach((btn) => {
     const active = btn.dataset.purpose === state.purpose;
     btn.classList.toggle("active", active);
     btn.setAttribute("aria-pressed", String(active));
   });
+  document.querySelectorAll("[data-free]").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.free === state.freeLevel);
+  });
 }
 
 // ---------------- 필터링 ----------------
 function matches(service) {
-  if (state.category !== "all" && service.category !== state.category) return false;
   if (state.freeLevel !== "all" && service.freeLevel !== state.freeLevel) return false;
-  if (state.purpose && !(service.purposes || []).includes(state.purpose)) return false;
 
+  // 검색어가 있으면 탭 선택과 상관없이 전체에서 찾기
   if (state.query) {
-    const haystack = [
-      service.name,
-      service.desc,
-      service.useCase,
-      categoryMap[service.category].label,
-      ...(service.pros || []),
-    ]
+    const haystack = [service.name, service.desc, service.useCase, categoryMap[service.category].label, ...(service.pros || [])]
       .join(" ")
       .toLowerCase();
-    if (!haystack.includes(state.query)) return false;
+    return haystack.includes(state.query);
   }
-  return true;
+
+  if (state.tab === "category") {
+    return state.category === "all" || service.category === state.category;
+  }
+  return !state.purpose || (service.purposes || []).includes(state.purpose);
 }
 
-// ---------------- 카드 그리기 ----------------
+// ---------------- 카드 ----------------
 function cardHtml(service, index) {
   const cat = categoryMap[service.category];
   const spec = service.specSummary
-    ? `<li class="spec-line"><span class="info-label">🎞️ 스펙</span><span>${escapeHtml(service.specSummary)}</span></li>`
+    ? `<div class="info-row spec"><span class="info-label">스펙</span><span>${escapeHtml(service.specSummary)}</span></div>`
     : "";
 
   return `
@@ -122,11 +134,11 @@ function cardHtml(service, index) {
         ${koreanTag(service.korean)}
       </div>
       <p class="card-desc">${escapeHtml(service.desc)}</p>
-      <ul class="card-info">
-        <li class="free-line"><span class="info-label">🎁 무료</span><span>${escapeHtml(service.freeAmount)}</span></li>
+      <div class="card-info">
+        <div class="info-row free"><span class="info-label">무료</span><span>${escapeHtml(service.freeAmount)}</span></div>
         ${spec}
-        <li><span class="info-label">👍 추천</span><span>${escapeHtml(service.useCase)}</span></li>
-      </ul>
+        <div class="info-row"><span class="info-label">추천</span><span>${escapeHtml(service.useCase)}</span></div>
+      </div>
       <div class="card-actions">
         <button type="button" class="btn btn-ghost" data-detail="${index}">자세히 보기</button>
         <a class="btn btn-primary" href="${escapeHtml(service.url)}" target="_blank" rel="noopener noreferrer">바로가기 ↗</a>
@@ -139,36 +151,37 @@ function renderCards() {
 
   $("cardGrid").innerHTML = visible.map(({ s, i }) => cardHtml(s, i)).join("");
   $("emptyMessage").hidden = visible.length > 0;
-  $("resultCount").innerHTML = `<strong>${visible.length}</strong>개의 서비스`;
-
-  const filtered = state.category !== "all" || state.freeLevel !== "all" || state.purpose || state.query;
-  $("resetBtn").hidden = !filtered;
+  const scope = state.query ? " (전체에서 검색)" : "";
+  $("resultCount").innerHTML = `<strong>${visible.length}</strong>개의 서비스${scope}`;
+  $("resetBtn").hidden = !isFiltered();
 }
 
-// ---------------- 참고사항 그리기 ----------------
+// ---------------- 참고사항 (분야 선택 시에만) ----------------
 function renderTips() {
-  const keys = state.category === "all" ? CATEGORIES.map((c) => c.key) : [state.category];
-  const openAll = state.category !== "all";
+  const show = state.tab === "category" && state.category !== "all" && !state.query;
+  const items = show ? tips.filter((t) => t.category === state.category) : [];
 
-  $("tipsArea").innerHTML = keys
-    .map((key) => {
-      const items = tips.filter((t) => t.category === key);
-      if (items.length === 0) return "";
-      const cat = categoryMap[key];
-      return `
-        <details class="tip-group" style="${catStyle(key)}" ${openAll ? "open" : ""}>
-          <summary>
-            <span class="tag tag-category">${escapeHtml(cat.label)}</span>
-            <span class="tip-count">${items.length}개</span>
-          </summary>
-          <div class="tip-list">
-            ${items
-              .map((t) => `<div class="tip"><h4>${escapeHtml(t.title)}</h4><p>${escapeHtml(t.body)}</p></div>`)
-              .join("")}
-          </div>
-        </details>`;
-    })
-    .join("");
+  if (items.length === 0) {
+    $("tipsArea").innerHTML = "";
+    return;
+  }
+
+  const cat = categoryMap[state.category];
+  $("tipsArea").innerHTML = `
+    <section class="tip-box" style="${catStyle(state.category)}" aria-label="${escapeHtml(cat.label)} 참고사항">
+      <h3 class="tip-box-title">${escapeHtml(cat.label)} 참고사항 <span>${items.length}개 · 제목을 누르면 펼쳐져요</span></h3>
+      <div class="tip-list">
+        ${items
+          .map(
+            (t) => `
+          <details class="tip">
+            <summary>${escapeHtml(t.title)}</summary>
+            <p>${escapeHtml(t.body)}</p>
+          </details>`
+          )
+          .join("")}
+      </div>
+    </section>`;
 }
 
 // ---------------- 팝업 ----------------
@@ -177,12 +190,12 @@ function openDetail(index) {
   const cat = categoryMap[s.category];
 
   const source = s.source
-    ? `<div class="modal-section"><h3>🔎 찾아보는 범위</h3><p class="modal-highlight">${escapeHtml(s.source)}</p></div>`
+    ? `<div class="modal-section"><h3>찾아보는 범위</h3><p class="modal-highlight">${escapeHtml(s.source)}</p></div>`
     : "";
 
   const specs = s.specs
     ? `<div class="modal-section">
-        <h3>🎞️ 동영상 스펙 (무료 기준)</h3>
+        <h3>동영상 스펙 (무료 기준)</h3>
         <table class="spec-table">
           <tbody>
             ${s.specs.map(([k, v]) => `<tr><th scope="row">${escapeHtml(k)}</th><td>${escapeHtml(v)}</td></tr>`).join("")}
@@ -192,7 +205,7 @@ function openDetail(index) {
     : "";
 
   const creditTips = s.creditTips
-    ? `<div class="modal-section box tips"><h3>💡 크레딧·무료 사용량 아끼는 법</h3><ul>${listItems(s.creditTips)}</ul></div>`
+    ? `<div class="modal-section box tips"><h3>크레딧·무료 사용량 아끼는 법</h3><ul>${listItems(s.creditTips)}</ul></div>`
     : "";
 
   $("modalContent").innerHTML = `
@@ -208,19 +221,19 @@ function openDetail(index) {
     </div>
 
     <div class="modal-section">
-      <h3>🎁 무료로 이 정도 쓸 수 있어요</h3>
+      <h3>무료로 이 정도 쓸 수 있어요</h3>
       <p class="modal-highlight free">${escapeHtml(s.freeAmount)}</p>
     </div>
 
     ${source}
 
     <div class="modal-section modal-two">
-      <div class="box pros"><h3>👍 장점</h3><ul>${listItems(s.pros)}</ul></div>
-      <div class="box cons"><h3>🤔 아쉬운 점</h3><ul>${listItems(s.cons)}</ul></div>
+      <div class="box pros"><h3>장점</h3><ul>${listItems(s.pros)}</ul></div>
+      <div class="box cons"><h3>아쉬운 점</h3><ul>${listItems(s.cons)}</ul></div>
     </div>
 
     <div class="modal-section">
-      <h3>💳 요금 상세</h3>
+      <h3>요금 상세</h3>
       <ul>${listItems(s.price)}</ul>
     </div>
 
@@ -228,7 +241,7 @@ function openDetail(index) {
     ${creditTips}
 
     <div class="modal-section">
-      <h3>📌 추천 용도</h3>
+      <h3>추천 용도</h3>
       <p>${escapeHtml(s.useCase)}</p>
     </div>
 
@@ -243,16 +256,34 @@ function openDetail(index) {
 
 // ---------------- 이벤트 ----------------
 function refresh() {
-  updateActiveButtons();
-  renderCards();
+  updateActive();
   renderTips();
+  renderCards();
 }
 
 function bindEvents() {
+  document.querySelector(".tabs").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-tab]");
+    if (!btn || btn.dataset.tab === state.tab) return;
+    // 탭을 바꾸면 이전 탭의 선택은 초기화 (두 조건이 얽히지 않도록)
+    state.tab = btn.dataset.tab;
+    state.category = "all";
+    state.purpose = null;
+    refresh();
+  });
+
   $("categoryList").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-category]");
     if (!btn) return;
     state.category = btn.dataset.category;
+    refresh();
+  });
+
+  $("purposeList").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-purpose]");
+    if (!btn) return;
+    const key = btn.dataset.purpose;
+    state.purpose = state.purpose === key ? null : key;
     refresh();
   });
 
@@ -263,27 +294,16 @@ function bindEvents() {
     refresh();
   });
 
-  $("purposeList").addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-purpose]");
-    if (!btn) return;
-    const key = btn.dataset.purpose;
-    // 같은 버튼을 다시 누르면 해제, 목적은 여러 분야에 걸쳐 있으므로 분야 필터는 전체로
-    state.purpose = state.purpose === key ? null : key;
-    state.category = "all";
-    refresh();
-    $("cardGrid").scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-
   $("searchInput").addEventListener("input", (e) => {
     state.query = e.target.value.trim().toLowerCase();
+    renderTips();
     renderCards();
-    $("resetBtn").hidden = !(state.category !== "all" || state.freeLevel !== "all" || state.purpose || state.query);
   });
 
   $("resetBtn").addEventListener("click", () => {
     state.category = "all";
-    state.freeLevel = "all";
     state.purpose = null;
+    state.freeLevel = "all";
     state.query = "";
     $("searchInput").value = "";
     refresh();
@@ -301,8 +321,8 @@ function bindEvents() {
   });
 }
 
+renderCategoryButtons();
 renderPurposes();
-renderCategoryChips();
-renderFreeChips();
+renderFreeButtons();
 bindEvents();
 refresh();

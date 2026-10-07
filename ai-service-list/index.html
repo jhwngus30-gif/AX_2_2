@@ -27,21 +27,24 @@
   </header>
 
   <main class="container">
-    <!-- 목적으로 찾기 -->
-    <section class="section" aria-labelledby="purposeTitle">
-      <h2 class="section-title" id="purposeTitle">이럴 땐 이거 <span>목적으로 찾기</span></h2>
-      <div class="purpose-list" id="purposeList"></div>
-    </section>
-
-    <!-- 필터 -->
-    <section class="section filters" aria-label="필터">
-      <div class="filter-row">
-        <span class="filter-label">분야</span>
-        <div class="chip-list" id="categoryList"></div>
+    <!-- 찾기 방식 탭 -->
+    <section class="section finder" aria-label="서비스 찾기">
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab" role="tab" id="tab-category" data-tab="category" aria-controls="panel-category">분야별로 보기</button>
+        <button type="button" class="tab" role="tab" id="tab-purpose" data-tab="purpose" aria-controls="panel-purpose">목적으로 찾기</button>
       </div>
-      <div class="filter-row">
+
+      <div class="tab-panel" role="tabpanel" id="panel-category" aria-labelledby="tab-category">
+        <div class="category-grid" id="categoryList"></div>
+      </div>
+
+      <div class="tab-panel" role="tabpanel" id="panel-purpose" aria-labelledby="tab-purpose" hidden>
+        <div class="purpose-grid" id="purposeList"></div>
+      </div>
+
+      <div class="free-row">
         <span class="filter-label">무료 활용도</span>
-        <div class="chip-list" id="freeList"></div>
+        <div class="segmented" id="freeList"></div>
       </div>
     </section>
 
@@ -51,14 +54,9 @@
         <p id="resultCount" class="result-count"></p>
         <button type="button" id="resetBtn" class="reset-btn" hidden>필터 초기화</button>
       </div>
+      <div id="tipsArea"></div>
       <div class="card-grid" id="cardGrid"></div>
       <p class="empty" id="emptyMessage" hidden>조건에 맞는 서비스가 없어요. 검색어나 필터를 바꿔 보세요.</p>
-    </section>
-
-    <!-- 참고사항 -->
-    <section class="section" aria-labelledby="tipsTitle">
-      <h2 class="section-title" id="tipsTitle">분야별 참고사항 <span>직접 써 보고 알게 된 것</span></h2>
-      <div id="tipsArea"></div>
     </section>
   </main>
 
