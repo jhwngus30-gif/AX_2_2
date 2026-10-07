@@ -6,6 +6,10 @@
 // freeLevel : "enough"(무료로 충분) | "taste"(무료는 맛보기) | "paid"(유료 필수)
 // korean    : "good"(좋음) | "normal"(보통) | "weak"(약함) | 생략하면 표시 안 함
 // purposes  : 아래 PURPOSES의 key (목적으로 찾기에 연결)
+// howTo     : 시작하는 방법
+//   access   : "web"(웹에서 바로) | "install"(프로그램 설치) | "app"(모바일 앱)
+//   signup   : 가입 방법 / steps : 단계 3~4개 / firstTry : 처음 해보기 좋은 작업
+//   prompt   : (선택) 바로 복사해서 쓸 수 있는 예시 프롬프트
 // "(조사)" 표시가 붙은 내용은 팀 자료가 아닌 외부 자료 조사 값입니다. (2026.10 기준)
 // =========================================================
 
@@ -40,6 +44,13 @@ const FREE_LEVELS = {
   paid:   { label: "유료 필수",     emoji: "🔴" },
 };
 
+// label: 팝업에 쓰는 이름 / short: 카드에 쓰는 짧은 이름
+const ACCESS_LABELS = {
+  web:     { label: "웹에서 바로",   short: "웹" },
+  install: { label: "프로그램 설치", short: "PC 설치" },
+  app:     { label: "모바일 앱",     short: "앱" },
+};
+
 const KOREAN_LEVELS = {
   good:   "한국어 좋음",
   normal: "한국어 보통",
@@ -70,8 +81,8 @@ const services = [
     ],
     price: [
       "무료: 하루 50 크레딧 (이월 안 됨)",
-      "Google AI Pro: $19.99/월",
-      "Google AI Ultra: 상위 요금제 (워터마크 제거는 Ultra만, 조사)",
+      "Google AI Pro: $19.99/월 · Flow 월 1,000 크레딧 (조사)",
+      "Google AI Ultra: 월 $100 (1만 크레딧) / 월 $200 (2만 5천 크레딧) · 워터마크 제거 (조사)",
     ],
     creditTips: [
       "생성 전에 출력 형식이 '영상'인지 먼저 확인하기 (이미지로 나오면 크레딧만 소모됨)",
@@ -85,6 +96,18 @@ const services = [
       ["워터마크", "무료·Pro에 'Made with Veo' 표시, Ultra에서 제거 (조사)"],
       ["상업적 이용", "요금제별 이용 조건 확인 필요"],
     ],
+    howTo: {
+      access: ["web"],
+      signup: "Google 계정",
+      steps: [
+        "labs.google/flow 접속 후 Google 계정으로 로그인",
+        "새 프로젝트 만들기 → 생성 방식을 '텍스트로 영상 만들기'로 선택",
+        "출력 형식이 '영상'인지, 모델(Lite·Fast 등)과 길이를 확인",
+        "프롬프트 입력 후 생성 → 마음에 들면 다운로드, 아니면 채팅하듯 수정 요청",
+      ],
+      firstTry: "6초짜리 짧은 장면 하나를 가벼운 모델로 만들어 보기",
+      prompt: "A Korean woman in her 30s smiling and drinking coffee by a sunny cafe window, cinematic, 6 seconds",
+    },
   },
   {
     name: "Kling",
@@ -108,7 +131,7 @@ const services = [
     price: [
       "무료: 로그인 크레딧 (확인 시점 66, 하루 단위·이월 안 됨)",
       "Standard: $6.99/월부터 (월 660 크레딧)",
-      "상위: Pro, Premier, Ultra",
+      "Pro 월 3,000 / Premier 월 8,000 / Ultra 월 26,000 크레딧 (첫 결제 할인이 있어 가격은 공식 사이트 확인, 조사)",
     ],
     creditTips: [
       "생성 버튼 옆 크레딧 표시를 꼭 확인하고 생성하기",
@@ -122,6 +145,18 @@ const services = [
       ["워터마크", "무료 영상에는 있음"],
       ["상업적 이용", "무료 플랜은 불가 (조사)"],
     ],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google 계정 또는 이메일",
+      steps: [
+        "klingai.com 접속 후 로그인",
+        "영상 생성 → '텍스트로 영상' 또는 '이미지로 영상' 선택",
+        "해상도(720p), 길이(5초), 오디오(끔)를 정하고 생성 버튼 옆 크레딧 확인",
+        "생성 후 결과 확인 → 다운로드",
+      ],
+      firstTry: "720p·5초·오디오 끔으로 하루 무료 크레딧 안에서 클립 2개 만들어 보기",
+      prompt: "A Korean man in his 20s walking along the Han River at sunset, slow camera follow, realistic",
+    },
   },
   {
     name: "CapCut",
@@ -160,6 +195,17 @@ const services = [
       ["자동 자막", "무료는 월 횟수 제한"],
       ["유료 내보내기", "4K·HDR (조사)"],
     ],
+    howTo: {
+      access: ["web", "install", "app"],
+      signup: "Google·TikTok 계정 또는 이메일",
+      steps: [
+        "capcut.com에서 웹으로 쓰거나 PC 프로그램·모바일 앱 설치",
+        "새 프로젝트 → 영상 파일 불러오기 (또는 템플릿 선택)",
+        "자르기·효과·음악으로 편집 → 마지막에 '자동 캡션'으로 자막 생성",
+        "내보내기 → 해상도 1080p 선택 후 저장",
+      ],
+      firstTry: "템플릿 하나를 골라 내 사진·영상만 바꿔 15초 숏폼 만들어 보기",
+    },
   },
   {
     name: "Vrew",
@@ -184,7 +230,7 @@ const services = [
     ],
     price: [
       "무료: 월 200 크레딧 (매달 1일 충전, 이월 안 됨, 조사)",
-      "유료: 라이트, 스탠다드, 비즈니스",
+      "유료: 라이트(월 2,000 크레딧) / 스탠다드(월 10,000 크레딧) / 비즈니스 · 2026년 4월부터 통합 크레딧 방식 (가격은 공식 사이트 확인, 조사)",
     ],
     creditTips: [
       "1분 단위로 차감되므로 짧은 클립을 하나로 이어 붙인 뒤 한 번에 자막 생성하기",
@@ -195,6 +241,17 @@ const services = [
       ["워터마크", "일부 기능 사용 시 표시, 출처 표기 신청 시 제거 가능 (조사)"],
       ["자동 자막", "월 200 크레딧 안에서, 1분 단위 차감"],
     ],
+    howTo: {
+      access: ["install"],
+      signup: "이메일 또는 Google 계정",
+      steps: [
+        "vrew.ai에서 PC 프로그램(Windows·Mac) 다운로드 후 설치",
+        "새로 만들기 → 영상 파일 불러오기",
+        "음성 분석(자동 자막) 실행 → 잘못 인식된 단어·무음 구간 정리",
+        "내보내기에서 해상도 선택 후 영상 저장",
+      ],
+      firstTry: "1분짜리 내 목소리 영상 하나로 자동 자막 만들고 무음 구간 지워 보기",
+    },
   },
 
   // ---------------- 자동화 ----------------
@@ -225,13 +282,25 @@ const services = [
     price: [
       "무료: 월 1,000 크레딧, 활성 시나리오 2개, 최소 실행 간격 15분 (기간 제한 없음)",
       "Core: 월 $9부터 (연간 결제 기준, 1만 크레딧)",
-      "상위: Pro, Teams, Enterprise",
+      "Pro: 월 $16 / Teams: 월 $29 (연간 결제, 1만 크레딧 기준, 조사)",
     ],
     creditTips: [
       "모듈 실행 1회당 1 크레딧이므로, 단계(모듈) 수를 줄일수록 더 많이 실행 가능",
       "테스트 실행도 크레딧이 들어가니 소량 데이터로 먼저 확인하기",
       "실행 간격을 너무 짧게 두지 않기 (15분마다 돌면 하루 96회 실행)",
     ],
+    howTo: {
+      access: ["web"],
+      signup: "Google 계정 또는 이메일",
+      steps: [
+        "make.com 가입 → Create a new scenario",
+        "첫 모듈(트리거) 선택: 예) Google Sheets '새 행이 추가되면'",
+        "다음 모듈 연결: 예) AI 요약 → Gmail 보내기, 각 칸에 앞 단계 값 연결",
+        "Run once로 테스트 → 모듈별 결과 확인 후 스케줄 켜기",
+      ],
+      firstTry: "구글 시트에 한 줄 추가하면 내 메일로 알림이 오는 2단계 시나리오 만들기",
+      prompt: "(Maia에게) 구글 시트에 새 행이 생기면 내용을 요약해서 내 Gmail로 보내는 시나리오 만들어줘",
+    },
   },
   {
     name: "Dify",
@@ -264,6 +333,18 @@ const services = [
       "테스트할 때는 가벼운 모델을 선택하기 (상위 모델은 1회에 크레딧이 훨씬 많이 듦)",
       "자신의 AI API 키를 연결하면 기본 크레딧을 아낄 수 있음",
     ],
+    howTo: {
+      access: ["web"],
+      signup: "Google·GitHub 계정 또는 이메일 (직접 설치도 가능)",
+      steps: [
+        "cloud.dify.ai 가입 (또는 오픈소스를 서버에 직접 설치)",
+        "앱 만들기 → '챗봇' 또는 '워크플로' 선택 (템플릿으로 시작 가능)",
+        "지식(Knowledge)에 문서를 올리고 챗봇에 연결, 모델·지시문 설정",
+        "오른쪽 미리보기에서 대화 테스트 → 게시하면 링크로 공유",
+      ],
+      firstTry: "강의자료 PDF 하나를 올려 그 내용만으로 답하는 Q&A 챗봇 만들기",
+      prompt: "(지시문) 너는 업로드된 문서 내용만으로 답하는 도우미야. 문서에 없는 내용은 '자료에 없습니다'라고 답해.",
+    },
   },
   {
     name: "n8n",
@@ -288,12 +369,23 @@ const services = [
     ],
     price: [
       "클라우드: 영구 무료 플랜 없음, 14일 무료 체험",
-      "Starter: 월 €20부터 (연간 결제 기준, 실행 2,500회)",
+      "Starter: 월 €20 (실행 2,500회) / Pro: 월 €50 (실행 1만 회) / Business: 월 €667 (연간 결제, 조사)",
       "직접 설치(Community Edition): 무료, 실행 횟수 무제한",
     ],
     creditTips: [
       "실행 1회 단위 과금이라, 여러 단계를 하나의 워크플로로 묶을수록 유리함",
     ],
+    howTo: {
+      access: ["web", "install"],
+      signup: "이메일 (클라우드) / 직접 설치는 가입 불필요",
+      steps: [
+        "n8n.io에서 클라우드 14일 체험 시작 (또는 Docker로 내 PC·서버에 설치)",
+        "새 워크플로 → 트리거 노드 추가 (예: Schedule, Webhook)",
+        "+ 버튼으로 다음 노드 연결 (예: HTTP 요청 → Slack 메시지)",
+        "Execute workflow로 테스트 → Active 켜서 자동 실행",
+      ],
+      firstTry: "매일 아침 9시에 날씨 정보를 받아 메신저로 보내는 워크플로 만들기",
+    },
   },
 
   // ---------------- 리서치·검색 ----------------
@@ -303,13 +395,31 @@ const services = [
     desc: "궁금한 것을 바로 묻고, 출처 링크와 함께 빠르게 답을 얻는 AI 검색",
     url: "https://www.perplexity.ai/",
     freeLevel: "enough",
-    freeAmount: "일반 검색 무료 · 고급 검색은 횟수 제한",
+    freeAmount: "기본 검색 무제한 · Pro 검색 하루 약 5회 (조사)",
     useCase: "뉴스 조사, 팩트 체크",
     purposes: ["research"],
     source: "웹 전체 (뉴스, 블로그, 공식 사이트)",
     pros: ["답마다 출처 링크가 붙어 바로 검증할 수 있음", "사실 확인을 위한 자료 검색에 특화됨"],
     cons: ["무료는 고급 검색 횟수 제한"],
-    price: ["무료 + 유료"],
+    price: [
+      "무료: 기본 검색 무제한, Pro 검색 하루 약 5회 (조사)",
+      "Pro: 월 $20 / 연 $200 · Pro 검색 무제한, Deep Research 하루 20회 (조사)",
+    ],
+    creditTips: [
+      "간단한 질문은 기본 검색으로, 여러 출처 비교가 필요한 질문에만 Pro 검색 쓰기",
+    ],
+    howTo: {
+      access: ["web", "app"],
+      signup: "가입 없이 사용 가능 (기록 저장은 Google·Apple 계정)",
+      steps: [
+        "perplexity.ai 접속 (앱도 있음)",
+        "검색창에 궁금한 것을 문장으로 질문",
+        "답변 아래 출처 번호를 눌러 원문 확인",
+        "이어지는 질문으로 범위 좁히기",
+      ],
+      firstTry: "최근 뉴스 하나를 골라 사실 확인해 보기",
+      prompt: "2026년 국내 생성형 AI 이용률 통계를 출처와 함께 알려줘",
+    },
   },
   {
     name: "NotebookLM",
@@ -317,7 +427,7 @@ const services = [
     desc: "내가 모은 자료 안에서만 답해 주는 나만의 자료 비서",
     url: "https://notebooklm.google.com",
     freeLevel: "enough",
-    freeAmount: "자료 업로드·질문·음성 요약 기본 기능 무료",
+    freeAmount: "노트북 100개 · 노트북당 자료 50개 · 하루 채팅 약 50회 · 음성 요약 하루 3회 (조사)",
     useCase: "강의자료·논문 요약, 시험 공부",
     purposes: ["paper", "research"],
     source: "사용자가 올린 자료 (웹에서 찾은 자료 추가 가능)",
@@ -327,7 +437,25 @@ const services = [
       "음성 요약 기능",
     ],
     cons: ["웹 검색이 아니라 자료를 먼저 넣어야 함"],
-    price: ["무료 + 유료"],
+    price: [
+      "무료: 위 한도로 계속 무료 (Google 계정만 있으면 됨, 조사)",
+      "유료: Google AI Plus·Pro·Ultra 구독에 포함되어 한도 증가 (조사)",
+    ],
+    creditTips: [
+      "음성 요약은 하루 3회라 자료를 다 넣은 뒤 마지막에 한 번 만들기",
+    ],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google 계정",
+      steps: [
+        "notebooklm.google.com 접속 → 새 노트북 만들기",
+        "자료 추가: PDF, 구글 문서, 웹 주소, 유튜브 링크 등",
+        "채팅창에 질문 → 답변의 번호를 눌러 근거 위치 확인",
+        "오른쪽 스튜디오에서 음성 요약·학습 가이드 만들기",
+      ],
+      firstTry: "강의자료 PDF 2~3개를 넣고 핵심 개념 요약받기",
+      prompt: "이 자료들의 핵심 개념 5가지를 정리하고, 각각 어느 자료에 나오는지 표시해줘",
+    },
   },
   {
     name: "Liner",
@@ -335,7 +463,7 @@ const services = [
     desc: "웹과 논문을 함께 찾고, 논문의 어느 문단이 근거인지까지 보여 주는 학술 검색",
     url: "https://app.liner.com/ko",
     freeLevel: "taste",
-    freeAmount: "무료 플랜 있음 · 무료 기능 범위가 좁은 편",
+    freeAmount: "기본 검색·딥 리서치 무료 (광고 포함) · 파일 업로드 하루 1회 · Scholar·Write 전체 기능은 유료 (조사)",
     useCase: "레포트 참고문헌 찾기",
     purposes: ["paper"],
     korean: "good",
@@ -346,7 +474,26 @@ const services = [
       "초안 작성도 사이트 안에서 가능",
     ],
     cons: ["무료 기능 범위가 좁은 편"],
-    price: ["무료 + 유료"],
+    price: [
+      "Free: 무료 (광고 포함, 파일 업로드 하루 1회·25MB)",
+      "Pro: 월 $17.99 (연간 결제 시 월 $14.99) · Scholar·Write 전체, 파일 하루 20회 (조사)",
+      "Max: 월 $35.99 (연간 결제 시 월 $29.99) (조사)",
+    ],
+    creditTips: [
+      "파일 업로드는 하루 1회라, 여러 논문은 하나의 PDF로 묶어서 올리기",
+    ],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google·Apple 계정 또는 이메일",
+      steps: [
+        "app.liner.com/ko 접속 후 로그인",
+        "검색창 위에서 Scholar(논문) 모드 선택",
+        "질문 입력 → 답변 속 출처를 눌러 논문의 근거 문단 확인",
+        "필요한 자료는 저장하고 초안 작성 기능으로 정리",
+      ],
+      firstTry: "레포트 주제 하나로 참고할 논문 5편 찾기",
+      prompt: "대학생의 생성형 AI 사용이 학습 성과에 미치는 영향에 대한 논문을 찾아줘",
+    },
   },
   {
     name: "Gemini Deep Research",
@@ -354,7 +501,7 @@ const services = [
     desc: "주제 하나로 웹을 넓게 조사해 보고서로 정리해 주는 AI",
     url: "https://gemini.google.com/",
     freeLevel: "taste",
-    freeAmount: "무료 계정도 사용 가능 · 사용 횟수 제한 (공식 사이트 확인)",
+    freeAmount: "무료 계정 Deep Research 월 5회 (조사)",
     useCase: "과제 초반 자료 조사",
     purposes: ["research"],
     source: "웹 전체를 넓고 깊게 (허용하면 내 Gmail·Drive까지)",
@@ -364,8 +511,23 @@ const services = [
       "Google Docs로 바로 내보낼 수 있음",
     ],
     cons: ["시간이 몇 분 걸림", "분량이 길어 다시 읽고 정리해야 함"],
-    price: ["무료 + 유료"],
+    price: [
+      "무료: Deep Research 월 5회 (빠른 모델, 조사)",
+      "Google AI Pro: $19.99/월 · 하루 최대 20회 (조사)",
+    ],
     creditTips: ["횟수가 제한되므로 조사 계획 단계에서 범위를 충분히 다듬은 뒤 시작하기"],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google 계정",
+      steps: [
+        "gemini.google.com 접속 → 입력창의 도구에서 'Deep Research' 선택",
+        "조사할 주제 입력 → 제시된 조사 계획 확인·수정 후 시작",
+        "몇 분 기다리면 출처가 달린 보고서 완성",
+        "Google Docs로 내보내서 필요한 부분만 정리",
+      ],
+      firstTry: "과제 주제 하나로 보고서를 받아 목차를 잡는 데 활용하기",
+      prompt: "국내 AI 음성 번역 서비스 시장 현황과 주요 업체를 조사해서 보고서로 정리해줘",
+    },
   },
   {
     name: "Consensus",
@@ -373,7 +535,7 @@ const services = [
     desc: "연구 논문들이 어떤 주장에 얼마나 동의하는지 한눈에 보여 주는 AI",
     url: "https://consensus.app",
     freeLevel: "taste",
-    freeAmount: "무료 플랜 있음 · 고급 분석은 횟수 제한 (공식 사이트 확인)",
+    freeAmount: "Pro 분석 월 15회 · Deep Search 월 3회 (조사)",
     useCase: "어떤 주장이 과학적으로 맞는지 빠르게 확인",
     purposes: ["paper"],
     korean: "weak",
@@ -386,8 +548,23 @@ const services = [
       "예/아니오 질문에서만 합의 정도를 보여 주고, 열린 질문에는 장점이 줄어듦",
       "영어 논문 중심",
     ],
-    price: ["무료 + 유료"],
+    price: [
+      "무료: Pro 분석 월 15회, Deep Search 월 3회 (조사)",
+      "Pro: 월 $10 / Deep: 월 $45 · 연간 결제 할인, 학생 40% 할인 (조사)",
+    ],
     creditTips: ["'~은 효과가 있는가?'처럼 예/아니오 질문으로 바꿔 물어야 기능을 제대로 활용 가능"],
+    howTo: {
+      access: ["web"],
+      signup: "Google 계정 또는 이메일",
+      steps: [
+        "consensus.app 접속 후 로그인",
+        "예/아니오로 답할 수 있는 질문을 영어로 입력",
+        "상단 Consensus Meter에서 연구들의 동의 비율 확인",
+        "논문 목록에서 핵심 결과 요약을 보고 원문 열기",
+      ],
+      firstTry: "평소 궁금했던 건강·학습 상식이 연구로 맞는지 확인해 보기",
+      prompt: "Does drinking coffee improve memory?",
+    },
   },
   {
     name: "Elicit",
@@ -395,14 +572,29 @@ const services = [
     desc: "여러 논문의 연구 방법과 결과를 표로 뽑아 비교해 주는 AI",
     url: "https://elicit.com",
     freeLevel: "taste",
-    freeAmount: "무료 플랜 있음 · 표 추출 등은 사용량 제한 (공식 사이트 확인)",
+    freeAmount: "논문 검색·요약 무제한 · 자동 보고서 월 2회 (조사)",
     useCase: "레포트나 논문 쓸 때 선행연구 비교·정리",
     purposes: ["paper"],
     source: "학술 논문만",
     pros: ["여러 논문에서 연구 방법, 대상 수, 결과 같은 항목을 뽑아 표로 정리"],
     cons: ["비교할 항목을 사용자가 정해야 해서 연구 주제를 어느 정도 알아야 잘 쓸 수 있음"],
-    price: ["무료 + 유료"],
+    price: [
+      "Basic(무료): 논문 검색·요약 무제한, 자동 보고서 월 2회 (조사)",
+      "Plus: 월 $12 / Pro: 월 $49 (조사)",
+    ],
     creditTips: ["비교할 항목(연구 방법, 대상 수, 결과 등)을 미리 정해 두고 한 번에 추출하기"],
+    howTo: {
+      access: ["web"],
+      signup: "Google 계정 또는 이메일",
+      steps: [
+        "elicit.com 접속 후 로그인",
+        "연구 질문을 영어로 입력해 관련 논문 찾기",
+        "표에 비교할 항목(연구 방법, 대상 수, 결과 등) 열 추가",
+        "정리된 표를 보고 필요한 논문만 골라 원문 확인",
+      ],
+      firstTry: "선행연구 5편을 연구 방법·대상 수·결과로 비교하는 표 만들기",
+      prompt: "What are the effects of AI tutors on student learning outcomes?",
+    },
   },
 
   // ---------------- 웹·UI/UX 디자인 ----------------
@@ -412,12 +604,26 @@ const services = [
     desc: "말로 설명하면 화면 시안을 여러 개 뽑아 비교하게 해 주는 무료 AI",
     url: "https://stitch.withgoogle.com",
     freeLevel: "enough",
-    freeAmount: "무료로 사용 가능",
+    freeAmount: "월 350회 생성(Standard) + 50회(Experimental) (조사)",
     useCase: "디자인 방향을 정하기 전 아이디어 얻기",
     purposes: ["build"],
     pros: ["무료이고, 시안을 여러 개 받아 비교할 수 있음", "Figma로 내보내기 가능"],
     cons: ["실험 단계라 기능이 자주 바뀜", "세밀한 수정은 어려움"],
-    price: ["무료"],
+    price: [
+      "무료 (Google Labs 실험 서비스, 추후 바뀔 수 있음, 조사)",
+    ],
+    howTo: {
+      access: ["web"],
+      signup: "Google 계정",
+      steps: [
+        "stitch.withgoogle.com 접속 후 로그인",
+        "모바일 앱 / 웹 중 선택하고 만들 화면을 말로 설명",
+        "생성된 여러 시안 중 마음에 드는 것을 골라 대화로 수정",
+        "Figma로 내보내거나 코드로 복사",
+      ],
+      firstTry: "이 AI 툴 가이드 사이트의 메인 화면 시안 3개 받아 보기",
+      prompt: "AI 툴을 분야별로 소개하는 웹사이트 메인 화면. 파스텔 톤, 상단 검색창, 카드형 목록",
+    },
   },
   {
     name: "클로드 디자인",
@@ -425,7 +631,7 @@ const services = [
     desc: "대화하면서 프로토타입과 발표 슬라이드를 만드는 AI",
     url: "https://claude.ai/design",
     freeLevel: "paid",
-    freeAmount: "유료 요금제 필요 (무료 사용 범위 확인 필요)",
+    freeAmount: "무료 플랜 없음 · Claude Pro(월 $20) 이상 구독 시 사용량 안에서 이용 (조사)",
     useCase: "아이디어를 클릭되는 시제품으로 보여 줄 때",
     purposes: ["build", "slides"],
     pros: [
@@ -434,7 +640,22 @@ const services = [
       "반복 지시가 줄어 토큰 절약에도 도움",
     ],
     cons: ["2026년 4월에 나온 서비스라 참고 자료가 적음", "무료 사용 범위 확인 필요"],
-    price: ["유료"],
+    price: [
+      "별도 요금 없음, Claude 구독에 포함 (조사)",
+      "Pro: 월 $20 / Max: 월 $100~$200 / Team: 1인 월 $30 (5인 이상) (조사)",
+    ],
+    howTo: {
+      access: ["web"],
+      signup: "Claude 계정 (Pro 이상 구독)",
+      steps: [
+        "claude.ai/design 접속",
+        "만들 프로토타입이나 슬라이드를 대화로 설명",
+        "화면의 요소를 직접 눌러 글씨 크기·위치·색 값을 조절",
+        "완성되면 공유하거나 내보내기",
+      ],
+      firstTry: "서비스 아이디어 하나를 클릭되는 3화면짜리 시제품으로 만들어 보기",
+      prompt: "AI 툴 추천 앱의 시작 화면, 목록 화면, 상세 화면 3개를 클릭으로 이동되게 만들어줘",
+    },
   },
   {
     name: "v0",
@@ -442,13 +663,28 @@ const services = [
     desc: "말로 설명한 화면을 실제로 작동하는 코드로 만들어 주는 AI",
     url: "https://v0.dev",
     freeLevel: "taste",
-    freeAmount: "무료 크레딧 범위 안에서 사용 (공식 사이트 확인)",
+    freeAmount: "월 $5 상당 크레딧 · 하루 메시지 약 7회 (조사)",
     useCase: "디자인을 실제 웹페이지로 옮길 때",
     purposes: ["build"],
     pros: ["미리보기 화면과 코드가 함께 나와 바로 개발에 쓸 수 있음"],
     cons: ["React 기반 코드가 기본이라 HTML 과제에는 따로 요청해야 함"],
-    price: ["무료 + 유료"],
+    price: [
+      "무료: 월 $5 상당 크레딧, 하루 약 7회 (조사)",
+      "Team: 1인 월 $30 / Business: 1인 월 $100 (조사)",
+    ],
     creditTips: ["처음 요청에 'HTML·CSS·JavaScript로'를 명시해 다시 만드는 횟수 줄이기"],
+    howTo: {
+      access: ["web"],
+      signup: "Vercel 계정 (GitHub·Google 연동 가능)",
+      steps: [
+        "v0.dev 접속 후 로그인",
+        "만들 화면을 설명 (HTML이 필요하면 꼭 명시)",
+        "오른쪽 미리보기로 확인하고 대화로 수정",
+        "코드를 복사하거나 바로 배포",
+      ],
+      firstTry: "자기소개 한 페이지를 만들어 미리보기로 확인하기",
+      prompt: "React 말고 HTML, CSS, JavaScript로 자기소개 한 페이지를 만들어줘. 파스텔 톤, 반응형",
+    },
   },
   {
     name: "Figma",
@@ -456,7 +692,7 @@ const services = [
     desc: "AI로 만든 화면을 세밀하게 직접 다듬는 업계 표준 디자인 툴",
     url: "https://www.figma.com",
     freeLevel: "enough",
-    freeAmount: "개인 무료 플랜으로 기본 디자인 작업 가능",
+    freeAmount: "편집자 2명 · 파일 3개(파일당 3페이지) · AI 크레딧 월 500 (조사)",
     useCase: "시안을 완성도 있게 다듬을 때",
     purposes: ["build"],
     pros: [
@@ -465,7 +701,24 @@ const services = [
       "요소 하나하나를 조정할 수 있어 화면 완성도를 높이기에 적합",
     ],
     cons: ["기능이 많아 처음에 익히는 데 시간이 걸림"],
-    price: ["무료 + 유료"],
+    price: [
+      "Starter: 무료 (위 한도, 조사)",
+      "Professional: Full 좌석 월 $16 / Dev 좌석 $12 / Collab 좌석 $3 · AI 크레딧 월 3,000 (조사)",
+    ],
+    creditTips: [
+      "무료는 파일 3개까지라, 페이지를 나누지 말고 한 파일 안에 프레임으로 정리하기",
+    ],
+    howTo: {
+      access: ["web", "install"],
+      signup: "Google 계정 또는 이메일",
+      steps: [
+        "figma.com 가입 (웹에서 바로 쓰거나 PC 앱 설치)",
+        "새 디자인 파일 만들기 → 프레임 도구로 화면 크기 선택",
+        "글자·도형·이미지를 배치하고 오른쪽 패널에서 값 조절",
+        "공유 버튼으로 팀원 초대 → 함께 수정",
+      ],
+      firstTry: "Stitch에서 받은 시안을 가져와 글자 크기와 간격만 다듬어 보기",
+    },
   },
   {
     name: "Canva",
@@ -473,13 +726,27 @@ const services = [
     desc: "템플릿과 AI로 배너·포스터 같은 그래픽을 빠르게 만드는 툴",
     url: "https://www.canva.com/ko_kr/",
     freeLevel: "enough",
-    freeAmount: "기본 템플릿·편집 무료 · AI 기능은 월 소량 크레딧",
+    freeAmount: "기본 템플릿·편집 무료 · Magic Studio AI 월 50회 (조사)",
     useCase: "홍보물, 썸네일, 카드뉴스",
     purposes: ["promo"],
     korean: "good",
     pros: ["템플릿이 많아 디자인 경험이 없어도 쉬움", "PPT와 비슷해서 초보자도 쉽게 접근 가능"],
     cons: ["웹 화면 설계보다는 그래픽에 강함"],
-    price: ["무료 + 유료 (Pro 월 ₩9,900)"],
+    price: [
+      "무료: 기본 기능 + AI 월 50회 (조사)",
+      "Pro: 월 ₩9,900 · AI 월 500회, 배경 제거 무제한 (조사)",
+    ],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google·네이버·카카오 계정 또는 이메일",
+      steps: [
+        "canva.com/ko_kr 가입",
+        "만들 종류 선택 (포스터, 배너, 썸네일 등)",
+        "템플릿 고르기 → 글자·사진 바꾸기",
+        "공유 → 다운로드 (PNG·PDF)",
+      ],
+      firstTry: "이 사이트를 소개하는 인스타그램 게시물 한 장 만들기",
+    },
   },
   {
     name: "Framer",
@@ -487,12 +754,27 @@ const services = [
     desc: "프롬프트로 웹사이트를 만들고 바로 인터넷에 배포하는 툴",
     url: "https://www.framer.com",
     freeLevel: "enough",
-    freeAmount: "무료로 사이트 제작·공개 가능 · 도메인과 페이지 수 제한",
+    freeAmount: "Framer 기본 주소로 사이트 무료 공개 · 업로드 5MB 제한 (조사)",
     useCase: "포트폴리오·소개 사이트를 빨리 공개할 때",
     purposes: ["build"],
     pros: ["코딩 없이 사이트를 만들고 바로 공개"],
     cons: ["무료 플랜은 도메인과 페이지 수에 제한"],
-    price: ["무료 + 유료"],
+    price: [
+      "무료: framer.website 주소로 공개 (조사)",
+      "Basic: 월 $10 (내 도메인 연결) / Pro: 월 $30 (조사)",
+    ],
+    howTo: {
+      access: ["web", "install"],
+      signup: "Google 계정 또는 이메일",
+      steps: [
+        "framer.com 가입 (웹 또는 PC 앱)",
+        "새 프로젝트 → AI로 사이트 만들기 또는 템플릿 선택",
+        "글자·이미지를 바꾸고 페이지 추가",
+        "Publish 버튼으로 바로 인터넷에 공개",
+      ],
+      firstTry: "내 포트폴리오 한 페이지를 만들어 링크로 공유해 보기",
+      prompt: "UX 디자이너 포트폴리오 사이트. 소개, 프로젝트 3개, 연락처 섹션. 밝고 깔끔한 분위기",
+    },
   },
 
   // ---------------- 이미지 생성·편집 ----------------
@@ -519,6 +801,18 @@ const services = [
       "커뮤니티 피드에서 비슷한 결과물의 프롬프트를 먼저 참고하면 생성 횟수를 아낄 수 있음",
       "넣을 글자는 영어로, 따옴표로 묶어서 지정하기",
     ],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google 계정",
+      steps: [
+        "ideogram.ai 접속 후 로그인",
+        "프롬프트 입력 (넣을 글자는 영어로, 따옴표로 묶기)",
+        "스타일·비율 선택 후 생성 → 시안 4장 비교",
+        "마음에 드는 시안을 고르거나 다시 변형 → 다운로드",
+      ],
+      firstTry: "팀 이름이 들어간 영문 로고 시안 4장 받아 보기",
+      prompt: "A minimal pastel logo with the text \"AI TOOL GUIDE\", soft rounded letters, white background",
+    },
   },
   {
     name: "Canva (Magic Studio)",
@@ -526,7 +820,7 @@ const services = [
     desc: "생성부터 배경 제거(누끼)까지 처리하는 실무 디자인 툴",
     url: "https://www.canva.com/ko_kr/",
     freeLevel: "taste",
-    freeAmount: "기본 기능 + 월별 소량 AI 크레딧 · 핵심 AI 편집은 Pro",
+    freeAmount: "기본 기능 + Magic Studio AI 월 50회 · 배경 제거 등 핵심 편집은 Pro (조사)",
     useCase: "SNS 콘텐츠/배너 제작, 발표용 템플릿, 카드뉴스 및 마케팅 디자인",
     purposes: ["promo"],
     korean: "good",
@@ -537,10 +831,22 @@ const services = [
     ],
     cons: ["핵심 AI/편집 기능은 Canva Pro 구독 필수"],
     price: [
-      "무료: 기본 기능 및 월별 소량 AI 크레딧",
-      "Pro: 월 9,900원 (연간 99,000원)",
+      "무료: 기본 기능 + AI 월 50회 (조사)",
+      "Pro: 월 9,900원 (연간 99,000원) · AI 월 500회, 배경 제거 무제한 (조사)",
     ],
     creditTips: ["AI 생성은 소량 크레딧이므로, 무료 템플릿으로 틀을 먼저 잡고 꼭 필요한 부분만 AI로 생성하기"],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google·네이버·카카오 계정 또는 이메일",
+      steps: [
+        "canva.com/ko_kr 로그인 → 디자인 만들기",
+        "왼쪽 메뉴의 Magic Media에서 이미지 생성",
+        "사진을 선택하고 '사진 편집'에서 배경 제거·요소 나누기",
+        "글자를 얹어 완성 → 다운로드",
+      ],
+      firstTry: "제품 사진 한 장의 배경을 지우고 파스텔 배경으로 바꿔 보기",
+      prompt: "파스텔 톤의 노트북과 커피가 있는 책상, 위에서 내려다본 구도, 일러스트",
+    },
   },
   {
     name: "Midjourney",
@@ -556,7 +862,26 @@ const services = [
       "무료 체험이 없어 최소 결제 필수",
       "복잡한 영문 타이포그래피(글자 철자)는 Ideogram보다 아쉬움",
     ],
-    price: ["유료 전용 (무료 체험 불가)", "Basic 플랜: 월 $10부터"],
+    price: [
+      "유료 전용 (무료 체험 불가)",
+      "Basic: 월 $10 (Fast 약 3.3시간) / Standard: 월 $30 (15시간, Relax 무제한) / Pro: 월 $60 / Mega: 월 $120 · 연간 결제 20% 할인 (조사)",
+    ],
+    creditTips: [
+      "이미지 1장(4장 묶음)에 Fast 시간 약 1분이 들어감 → Basic은 약 200회 생성 (조사)",
+      "Standard 이상은 Relax 모드로 느리지만 무제한 생성 가능",
+    ],
+    howTo: {
+      access: ["web"],
+      signup: "Google 또는 Discord 계정 + 유료 구독",
+      steps: [
+        "midjourney.com 로그인 → 요금제 구독",
+        "Create 화면에서 프롬프트를 영어로 입력",
+        "생성된 4장 중 골라 확대(Upscale)하거나 변형(Vary)",
+        "마음에 드는 이미지 다운로드",
+      ],
+      firstTry: "같은 프롬프트로 조명만 바꿔 분위기 비교해 보기",
+      prompt: "a cozy Korean cafe interior at golden hour, soft film photography, warm light --ar 16:9",
+    },
   },
 
   // ---------------- 회의록·기록 ----------------
@@ -580,8 +905,22 @@ const services = [
       "글로벌 언어 지원 종류가 상대적으로 적음",
       "녹취록을 바탕으로 대화형 질문을 던지는 기능이 부족함",
     ],
-    price: ["매월 300분 무료 (데이터 수집 동의 시 최대 600분)"],
+    price: [
+      "개인: 매월 300분 무료 (데이터 수집 동의 시 최대 600분)",
+      "개인용 유료 요금제 없음 · Lite·Standard는 기업용 (조사)",
+    ],
     creditTips: ["데이터 수집에 동의하면 무료 시간이 최대 600분까지 늘어남 (회의 내용 보안은 확인 후 결정)"],
+    howTo: {
+      access: ["web", "app"],
+      signup: "네이버 계정",
+      steps: [
+        "clovanote.naver.com 접속 또는 모바일 앱 설치",
+        "앱으로 바로 녹음하거나 녹음 파일 업로드",
+        "참석자 수와 회의 종류를 선택하면 자동 전사",
+        "화자별 기록과 AI 요약 확인 → 공유·내보내기",
+      ],
+      firstTry: "10분짜리 팀 회의를 녹음해서 화자별 기록과 요약 받아 보기",
+    },
   },
   {
     name: "다글로",
@@ -604,6 +943,17 @@ const services = [
     ],
     price: ["무료: 매월 1,000 크레딧 (약 4시간 상당)", "Pro: 월 11,900원부터"],
     creditTips: ["녹음 앞뒤의 불필요한 구간을 잘라내고 올리면 크레딧을 아낄 수 있음"],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google·카카오·네이버 계정",
+      steps: [
+        "daglo.ai 가입 (모바일 앱도 있음)",
+        "녹음 파일 업로드 또는 유튜브 링크 붙여넣기",
+        "받아쓰기 결과 확인 → 요약 보기",
+        "보드챗으로 질문하거나 PPT·퀴즈 만들기",
+      ],
+      firstTry: "강의 유튜브 영상 링크로 요약과 복습 퀴즈 만들어 보기",
+    },
   },
   {
     name: "Otter.ai",
@@ -625,6 +975,17 @@ const services = [
       "Basic 무료: 매월 300분 (1회 미팅당 최대 30분)",
       "Pro: 연간 결제 시 월 $8.33 / 월간 결제 시 $16.99",
     ],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google·Microsoft 계정",
+      steps: [
+        "otter.ai 가입 → 구글·아웃룩 캘린더 연결",
+        "Zoom·Meet·Teams 회의에 Otter 봇이 자동 참여 (또는 직접 녹음)",
+        "회의가 끝나면 영문 전사본과 요약 확인",
+        "중요 문장에 표시하고 팀원에게 공유",
+      ],
+      firstTry: "영어 웨비나·강의 영상 30분 이내로 전사와 요약 받아 보기",
+    },
   },
 
   // ---------------- 시각화·PPT ----------------
@@ -634,13 +995,27 @@ const services = [
     desc: "템플릿 기반 올인원 디자인 툴",
     url: "https://www.canva.com/ko_kr/",
     freeLevel: "enough",
-    freeAmount: "기본 템플릿으로 발표 자료 제작 무료 · 고급 템플릿·아이콘은 유료",
+    freeAmount: "기본 템플릿으로 발표 자료 제작 무료 · AI 월 50회 · 고급 템플릿·아이콘은 유료 (조사)",
     useCase: "카드뉴스, 간단한 발표 자료",
     purposes: ["slides", "promo"],
     korean: "good",
     pros: ["방대한 템플릿", "세부 조정 및 협업 용이", "초보도 금방 안정적인 퀄리티의 결과물을 낼 수 있음"],
     cons: ["퀄리티 높은 템플릿과 아이콘 요소 대부분이 유료"],
-    price: ["무료 + 유료 (Pro 월간 ₩9,900)"],
+    price: [
+      "무료: 기본 템플릿 + AI 월 50회 (조사)",
+      "Pro: 월간 ₩9,900 · 프리미엄 템플릿·요소, AI 월 500회 (조사)",
+    ],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google·네이버·카카오 계정 또는 이메일",
+      steps: [
+        "canva.com/ko_kr 로그인 → '프레젠테이션' 선택",
+        "무료 템플릿 고르기 (왕관 표시는 유료)",
+        "내용 입력 → 팀원 초대해서 함께 수정",
+        "발표 모드로 바로 발표하거나 PPTX·PDF로 다운로드",
+      ],
+      firstTry: "Gamma로 만든 초안을 Canva 템플릿에 옮겨 디자인 다듬어 보기",
+    },
   },
   {
     name: "Gamma",
@@ -648,13 +1023,31 @@ const services = [
     desc: "프롬프트로 PPT를 만들어 주는 AI",
     url: "https://gamma.app/",
     freeLevel: "taste",
-    freeAmount: "무료 크레딧 범위 안에서 초안 제작 (공식 사이트 확인)",
+    freeAmount: "가입 시 1회 400 크레딧 (매달 충전 안 됨) → 발표자료 초안 약 10개 (조사)",
     useCase: "발표 초안, 빠른 공유용 자료",
     purposes: ["slides"],
     pros: ["몇 분 만에 초안 완성 가능", "PPT의 대략적인 틀을 잡을 때 매우 유용함"],
     cons: ["세부 수정 자유도가 비교적 낮음"],
-    price: ["무료 + 유료 (Plus 월간 $12)"],
-    creditTips: ["목차와 핵심 내용을 미리 정리해서 한 번에 넣으면 다시 생성하는 횟수가 줄어듦"],
+    price: [
+      "무료: 가입 시 400 크레딧 1회 (조사)",
+      "Plus: 월 $12 · 월 1,000 크레딧, Gamma 로고 제거 / Pro: 월 $25 / Ultra: 월 $100 (조사)",
+    ],
+    creditTips: [
+      "무료 크레딧은 다시 충전되지 않으니, 목차와 핵심 내용을 미리 정리해서 한 번에 넣기",
+      "AI로 다시 만들기보다 직접 수정하면 크레딧이 들지 않음",
+    ],
+    howTo: {
+      access: ["web"],
+      signup: "Google 계정 또는 이메일",
+      steps: [
+        "gamma.app 가입 → 새로 만들기 → '생성' 선택",
+        "주제와 장 수 입력 (또는 내 글을 붙여넣기)",
+        "AI가 제안한 목차를 확인·수정 → 테마 고르고 생성",
+        "슬라이드를 직접 고친 뒤 공유 링크나 PPTX로 내보내기",
+      ],
+      firstTry: "이번 프로젝트 소개 발표 초안 8장 만들어 보기",
+      prompt: "팀이 조사한 AI 툴 가이드 웹사이트를 소개하는 8장짜리 발표자료. 목적, 조사 분야, 사이트 기능, 활용 팁 순서로",
+    },
   },
 
   // ---------------- 음성·번역 ----------------
@@ -664,7 +1057,7 @@ const services = [
     desc: "문맥을 살린 자연스러운 문장의 AI 번역기",
     url: "https://www.deepl.com/ko/translator",
     freeLevel: "enough",
-    freeAmount: "텍스트 번역 무료 · 문서 파일 번역은 횟수 제한",
+    freeAmount: "텍스트 번역 무료 (1회 글자 수 제한) · 문서 파일 번역은 횟수 제한",
     useCase: "업무 메일, 보고서, 논문",
     purposes: ["translate", "paper"],
     pros: [
@@ -673,8 +1066,22 @@ const services = [
       "많은 양의 외국어를 한 번에 빠르게 읽거나 번역할 때 좋음",
     ],
     cons: ["무료 버전은 문서 번역 횟수 제한"],
-    price: ["무료 + 유료 (Individual 월 $10.49)"],
+    price: [
+      "무료: 텍스트 번역 (1회 글자 수 제한), 문서 번역 횟수 제한",
+      "유료: Individual 월 $10.49 · 연간 결제 시 Starter 월 $8.74부터 (조사)",
+    ],
     creditTips: ["문서 번역 횟수가 제한되므로, 짧은 글은 텍스트 창에 붙여 넣어 번역하기"],
+    howTo: {
+      access: ["web", "install", "app"],
+      signup: "가입 없이 사용 가능 (문서 번역은 로그인)",
+      steps: [
+        "deepl.com/ko/translator 접속 (PC 프로그램·앱도 있음)",
+        "왼쪽에 원문 붙여넣기 → 번역할 언어 선택",
+        "번역된 단어를 눌러 다른 표현으로 바꾸기",
+        "문서 번역 탭에서 Word·PDF 파일 통째로 번역",
+      ],
+      firstTry: "영어 논문 초록 하나를 번역해 원문과 비교해 보기",
+    },
   },
   {
     name: "Papago",
@@ -688,7 +1095,21 @@ const services = [
     korean: "good",
     pros: ["자연스러운 구어체", "접근성 편리", "요금 제약이 낮아 가볍게 쓰기에 가장 편함"],
     cons: ["긴 전문 문서에는 약함"],
-    price: ["무료 + 유료 (Plus Basic 월 ₩13,000)"],
+    price: [
+      "무료: 텍스트·이미지·음성 번역",
+      "Plus: 월 ₩13,000부터 · 문서·이미지 번역 횟수와 팀 기능에 따라 상위 요금제 있음 (조사)",
+    ],
+    howTo: {
+      access: ["web", "app"],
+      signup: "가입 없이 사용 가능 (네이버 계정 로그인 시 기록 저장)",
+      steps: [
+        "papago.naver.com 접속 또는 앱 설치",
+        "텍스트 입력, 사진 촬영(이미지 번역), 음성 대화 중 선택",
+        "번역 결과에서 높임말·반말 전환 확인",
+        "자주 쓰는 문장은 즐겨찾기에 저장",
+      ],
+      firstTry: "앱의 대화 모드로 외국어 메뉴판·간판 사진 번역해 보기",
+    },
   },
   {
     name: "ElevenLabs",
@@ -696,7 +1117,7 @@ const services = [
     desc: "사람 같은 목소리를 만드는 AI 음성 툴",
     url: "https://elevenlabs.io",
     freeLevel: "taste",
-    freeAmount: "무료 플랜 있음 · 월 사용량 제한 (공식 사이트 확인)",
+    freeAmount: "월 10,000 크레딧 → 음성 약 10분 · 상업적 이용 불가 (조사)",
     useCase: "영상 내레이션, 더빙",
     purposes: ["translate", "makevideo"],
     korean: "normal",
@@ -707,8 +1128,24 @@ const services = [
       "다른 음성 툴보다 덜 기계적임",
     ],
     cons: ["가끔 한국어 억양이 어색함"],
-    price: ["무료 + 유료 (Creator $11)"],
+    price: [
+      "무료: 월 10,000 크레딧 (약 10분), 출처 표기 필요·상업적 이용 불가 (조사)",
+      "Starter: 월 $6 · 30,000 크레딧, 상업적 이용 가능 (조사)",
+      "Creator: 월 $22 (첫 달 $11 할인가) · 121,000 크레딧 (조사)",
+    ],
     creditTips: ["글자 수 단위로 사용량이 줄어드니, 짧은 문장으로 목소리·톤을 먼저 테스트한 뒤 전체 원고 생성하기"],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google 계정 또는 이메일",
+      steps: [
+        "elevenlabs.io 가입 → Text to Speech 선택",
+        "원고 붙여넣기 → 목소리 고르기 (한국어 지원 모델 확인)",
+        "안정성·스타일 값을 조절하며 짧게 미리 듣기",
+        "생성 후 MP3로 다운로드",
+      ],
+      firstTry: "30초 분량 영상 내레이션 원고로 목소리 3개 비교해 보기",
+      prompt: "안녕하세요. 오늘은 프로젝트에 바로 쓸 수 있는 AI 툴을 분야별로 소개해 드리겠습니다.",
+    },
   },
 
   // ---------------- 범용 AI 에이전트 ----------------
@@ -738,6 +1175,18 @@ const services = [
       "요청을 여러 번 나누지 말고, 범위·출처 조건·결과 형식을 한 번에 구체적으로 적기",
       "결과의 수치는 출처별 정의와 연도가 다를 수 있으니 원문을 꼭 확인하기",
     ],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google·Apple 계정 또는 이메일",
+      steps: [
+        "manus.im 가입 (모바일 앱도 있음)",
+        "할 일을 구체적으로 입력 (범위·출처 조건·결과 형식 포함)",
+        "작업 과정이 진행되는 것을 확인하며 기다리기 (수 분 이상 걸림)",
+        "결과 파일을 받고 수치·출처를 원문으로 다시 확인",
+      ],
+      firstTry: "관심 산업 하나의 시장 규모를 출처별로 비교하는 표 받아 보기",
+      prompt: "글로벌 의료기기 시장 규모를 2023~2025년 기준으로 조사해줘. 출처별 수치와 정의를 표로 나눠서 정리하고, 신뢰도가 낮은 출처는 따로 표시해줘",
+    },
   },
   {
     name: "Genspark",
@@ -761,12 +1210,24 @@ const services = [
       "필요한 정보를 한 번에 묻지 않고 단계별로 하나씩 요청함",
     ],
     price: [
-      "무료: 매일 100 크레딧",
+      "무료: 매일 100 크레딧 (공개되지 않은 총 한도 있음, 조사)",
       "1단계 (월 10,000 크레딧): 월 $24.99",
       "2단계 (월 21,000 크레딧): 월 $49.99",
       "3단계 (월 125,000 크레딧): 월 $249.99",
     ],
     creditTips: ["단계별로 정보를 물어보니, 필요한 데이터·항목을 미리 준비해 두고 바로 답하기"],
+    howTo: {
+      access: ["web", "app"],
+      signup: "Google·Apple 계정 또는 이메일",
+      steps: [
+        "genspark.ai 가입",
+        "원하는 결과물 종류 선택 (대시보드, 슬라이드 등) → 템플릿 고르기",
+        "AI가 단계별로 묻는 정보에 답하기",
+        "완성된 결과를 확인하고 수정 요청 → 공유",
+      ],
+      firstTry: "여행 일정과 예산을 넣어 여행 대시보드 만들어 보기",
+      prompt: "3박 4일 오사카 여행 대시보드를 만들어줘. 일정, 예산, 맛집, 교통편을 한눈에 보이게",
+    },
   },
 
   // ---------------- 바이브 코딩 ----------------
@@ -793,6 +1254,18 @@ const services = [
       "Pro: 월 $20 / Pro+: 월 $60 / Ultra: 월 $200",
     ],
     creditTips: ["무료 요청이 제한되므로, 수정할 파일과 원하는 결과를 한 번에 구체적으로 지시하기"],
+    howTo: {
+      access: ["install"],
+      signup: "Google·GitHub 계정 또는 이메일",
+      steps: [
+        "cursor.com에서 프로그램 다운로드 후 설치 (Windows·Mac)",
+        "프로젝트 폴더 열기 (File → Open Folder)",
+        "오른쪽 채팅(에이전트)에서 만들 기능을 설명",
+        "제안된 변경을 확인하고 적용(Accept) → 실행해서 확인",
+      ],
+      firstTry: "빈 폴더에서 간단한 할 일 목록 웹페이지 만들어 보기",
+      prompt: "HTML, CSS, JavaScript로 할 일을 추가·삭제할 수 있는 간단한 웹페이지를 만들어줘",
+    },
   },
   {
     name: "Windsurf",
@@ -818,5 +1291,17 @@ const services = [
       "Pro: 월 $20 / Teams: 월 $80 / Max: 월 $200",
     ],
     creditTips: ["에이전트 작업 횟수가 적으므로 간단한 수정은 자동완성으로 처리하고, 큰 작업만 에이전트에 맡기기"],
+    howTo: {
+      access: ["install"],
+      signup: "Google·GitHub 계정 또는 이메일",
+      steps: [
+        "windsurf.com에서 프로그램 다운로드 후 설치",
+        "프로젝트 폴더 열기 → 인덱싱이 끝날 때까지 잠시 대기",
+        "Cascade(에이전트)에 만들 기능을 설명",
+        "AI가 고친 파일 목록을 확인하고 실행 결과 점검",
+      ],
+      firstTry: "이 AI 툴 가이드 폴더를 열고 '카드에 즐겨찾기 버튼 추가'를 요청해 보기",
+      prompt: "이 프로젝트에서 카드마다 즐겨찾기 버튼을 추가하고, 즐겨찾기한 카드만 보는 필터를 만들어줘. 수정한 파일 목록도 알려줘",
+    },
   },
 ];
