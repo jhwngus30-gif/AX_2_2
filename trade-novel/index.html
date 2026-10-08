@@ -92,8 +92,11 @@ header.top h1 small { font-weight: 400; color: var(--ink-2); font-size: 12px; ma
   background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px;
 }
 /* 아바타 영역: 이미지(img/캐릭터id_표정.png)가 있으면 이미지, 없으면 도형 */
-.avatar { width: 84px; height: 84px; flex: none; position: relative; }
-.avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; }
+.avatar { width: 120px; height: 120px; flex: none; position: relative; }
+@media (max-width: 600px) { .avatar { width: 96px; height: 96px; } }
+/* 상반신 그림에서 얼굴과 어깨 쪽을 크게 보여준다 */
+.avatar .frame { width: 100%; height: 100%; overflow: hidden; border-radius: 14px; background: #fff; border: 1px solid var(--line); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.5); transform-origin: 50% 12%; }
 .avatar .shape {
   width: 100%; height: 100%; display: grid; place-items: center;
   color: #fff; font-size: 30px; font-weight: 700; position: relative;
@@ -2097,8 +2100,8 @@ function renderAvatar(charId, face) {
   img.alt = `${ch.name} ${label}`;
   img.onload = () => {
     if (token !== avatarToken) return;
-    el.innerHTML = '';
-    el.appendChild(img);
+    el.innerHTML = '<div class="frame"></div>';
+    el.firstChild.appendChild(img);
     if (label) el.insertAdjacentHTML('beforeend', `<span class="face">${label}</span>`);
   };
   img.onerror = () => { imgMissing.add(list[i]); i++; if (i < list.length) img.src = list[i]; else shape(); };
