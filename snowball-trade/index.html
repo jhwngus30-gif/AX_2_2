@@ -58,7 +58,7 @@ body {
 .dots span.now { background: #e2574c; }
 
 /* 무대 */
-#stage { position: relative; flex: 1; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; transition: background .6s; }
+#stage { position: relative; flex: 1; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; transition: background .6s; background-size: cover; background-position: center; }
 #place { position: absolute; top: 10px; left: 12px; color: rgba(255,255,255,.85); font-size: 13px; background: rgba(0,0,0,.3); padding: 4px 10px; border-radius: 99px; }
 #portrait { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 26px; min-height: 0; }
 #portrait .face { height: clamp(150px, 34vh, 290px); aspect-ratio: 200 / 240; filter: drop-shadow(0 10px 14px rgba(0,0,0,.4)); }
@@ -86,6 +86,7 @@ body {
 @keyframes blink { 50% { opacity: .25; } }
 
 /* 장소 배경 (그림 파일 없이 CSS로) */
+.bg-title   { background: radial-gradient(circle at 78% 22%, #ffe3a3 0, transparent 14%), linear-gradient(transparent 58%, #2a2440 58%), linear-gradient(#f39a6b, #6d4f8f 58%); }
 .bg-sewer   { background: repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 3px, transparent 3px 90px), radial-gradient(ellipse at 50% 120%, #4f7a5a 0, transparent 60%), linear-gradient(#22352f, #0f1a17); }
 .bg-office  { background: repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0 2px, transparent 2px 46px), radial-gradient(circle at 70% 20%, #f7d488 0, transparent 35%), linear-gradient(#5a4632, #2c2219); }
 .bg-port    { background: linear-gradient(transparent 62%, #1f5f8b 62%, #123d5c), radial-gradient(circle at 80% 18%, #ffe9a8 0, transparent 18%), linear-gradient(#8ccbe8, #d7eef7 62%); }
@@ -363,18 +364,30 @@ const SPRITES = {
     <path d="M62 186 q38 16 76 0 v10 q-38 16 -76 0z" fill="#2f9bb3" ${O} stroke-width="2"/>`),
 };
 
+// 그림 파일: 배경을 지운 PNG는 그대로 세우고, JPG는 배경째 액자에 넣는다.
 const IMG = {};
+const BG_KEYS = ['title', 'sewer', 'office', 'port', 'bank', 'portny', 'customs', 'storm', 'party'];
 function preloadImages() {
-  const names = [...Object.keys(SPRITES), 'snow_angry', 'snow_happy', 'snow_shock'];
-  names.forEach(n => {
+  const names = [...Object.keys(SPRITES), 'snow_angry', 'snow_happy', 'snow_shock', ...BG_KEYS.map(k => 'bg_' + k)];
+  names.forEach(n => ['png', 'jpg'].forEach(ext => {
     const im = new Image();
-    im.onload = () => { IMG[n] = im.src; };
-    im.src = `img/${n}.png`;
-  });
+    im.onload = () => {
+      if (IMG[n] && IMG[n].ext === 'png') return;
+      IMG[n] = { src: im.src, ext };
+      if (S && S.bgKey && n === 'bg_' + S.bgKey) setBg(S.bgKey);
+    };
+    im.src = `img/${n}.${ext}`;
+  }));
+}
+function setBg(key) {
+  S.bgKey = key;
+  const st = $('#stage'), pic = IMG['bg_' + key];
+  st.className = 'bg-' + key;
+  st.style.backgroundImage = pic ? `linear-gradient(rgba(0,0,0,.08), rgba(0,0,0,.25)), url("${pic.src}")` : '';
 }
 function sprite(id, mood = 'normal') {
   const k = IMG[`${id}_${mood}`] ? `${id}_${mood}` : id;
-  if (IMG[k]) return `<img class="photo" src="${IMG[k]}" alt="${WHO[id].name}">`;
+  if (IMG[k]) return `<img class="${IMG[k].ext === 'jpg' ? 'photo' : 'cut'}" src="${IMG[k].src}" alt="${WHO[id].name}">`;
   return SPRITES[id] ? SPRITES[id](mood) : '';
 }
 function moodOf(who, text) {
@@ -973,7 +986,7 @@ function startChapter(i) {
   save();
   hud();
   const ch = CH();
-  $('#stage').className = 'bg-' + val(ch.bg);
+  setBg(val(ch.bg));
   $('#place').textContent = '📍 ' + val(ch.place);
   showLine('n', '');
   openOverlay(`
@@ -1161,7 +1174,7 @@ function showTitle() {
   const saved = load();
   S = fresh();
   hud();
-  $('#stage').className = 'bg-sewer';
+  setBg('title');
   $('#place').textContent = '📍 뉴욕 지하';
   showLine('n', '');
   openOverlay(`<div class="card title">
