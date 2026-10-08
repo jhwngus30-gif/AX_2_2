@@ -7,7 +7,7 @@
 
 | 항목 | 권장 |
 |---|---|
-| 형식 | `.png` (배경 투명 권장) — `.webp`도 가능하지만 이름은 `.png`로 맞춰 주세요 |
+| 형식 | `.png`. 배경은 흰색 단색이면 됩니다. 올리면 투명 배경으로 바꿔서 넣습니다(`tools/remove_bg.py`) |
 | 비율·크기 | 정사각형 1:1, 512×512 이상 |
 | 구도 | 가슴 위 상반신, 정면 또는 살짝 비스듬히, 머리 위 여백 약간 |
 | 화풍 | 6명 모두 같은 화풍 (같은 도구·같은 스타일 문구로 생성) |
@@ -141,11 +141,22 @@ plain logistics windbreaker without logos, phone in hand, bluetooth earpiece
 
 ---
 
-## 선택 (없어도 됨)
+## 배경 그림
 
-| 파일 | 내용 |
-|---|---|
-| `bg_office.png` | 사무실 배경 (16:9, 흐릿하게) |
-| `bg_bank.png` | 은행 창구 배경 |
-| `bg_port.png` | 컨테이너 항만 배경 |
-| `mail_icon.png` | 메일 장면용 아이콘 (Dana, Marcus 장면) |
+장면마다 `bg` 이름이 정해져 있고, 게임은 `img/bg_이름.png` → `img/bg_이름.svg` 순서로 찾습니다.
+지금은 코드로 그린 SVG 배경 8장이 들어 있습니다. 같은 이름의 PNG를 올리면 PNG가 대신 나옵니다.
+가로로 긴 그림(16:9, 1600px 정도)에 사람 없이 장소만 그려주세요. 인물이 가운데에 서고 아래쪽은 대사창이 가리므로, 중요한 물건은 양옆 위쪽에 두는 게 좋습니다.
+
+| 이름 | 장소 | 쓰이는 장면 | 생성 프롬프트 예 |
+|---|---|---|---|
+| `office` | 해외영업팀 사무실 | 문의, 견적, 규제확인, 서류작성, 사기 메일(밤), 대금회수(저녁) | `Korean corporate office interior, desks with monitors, large windows with city view, soft daylight, no people` |
+| `meeting` | 작은 회의실 | 문 팀장 수습 장면 7개 | `small meeting room, whiteboard with a line chart, window blinds, wooden table, calm light, no people` |
+| `video_call` | 화상회의 화면 (상대 쪽 홈오피스) | 결제 협상 | `video call screen UI, background is a cozy home office with bookshelves, no people in frame` |
+| `mail` | 메일 프로그램 화면 | 옛 견적가 요구, 서렌더 요청, 잔금 미입금 | `email client screen on a monitor, inbox list and opened message, clean UI, no text legible` |
+| `port` | 부산 신항 컨테이너 부두 | 선적 예약, 배를 놓침(저녁) | `container port with gantry cranes and a container ship, Busan, daytime, no people` |
+| `bank` | 은행 수출입 창구 | 신용장 하자 | `Korean bank service counter with glass partitions and number display, no people` |
+| `la_terminal` | LA 컨테이너 터미널 | 서류 불일치 통관 보류 | `Los Angeles container terminal at golden hour, palm trees, chain-link fence, a container tagged HOLD, no people` |
+| `customs_warehouse` | 미국 세관 보세창고 | FDA 통관 거부 | `customs bonded warehouse interior, steel racks with cardboard boxes, a red DETAINED sign, no people` |
+
+같은 장소라도 장면에 `bgTint`를 적으면 색조가 바뀝니다: `night`(밤), `evening`(저녁), `alert`(붉은 경고).
+새 장소를 추가하려면 장면에 `bg: '새이름'`을 적고 `img/bg_새이름.png`를 올리면 됩니다.
