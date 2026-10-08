@@ -196,6 +196,10 @@ header.top h1 small { font-weight: 400; color: var(--ink-2); font-size: 12px; ma
 
 /* 입력 */
 .controls { display: flex; gap: 6px; flex-wrap: wrap; }
+.nextbar { display: flex; gap: 8px; justify-content: flex-end; align-items: center; flex-wrap: wrap; padding: 8px 0 4px; }
+.nextbar .msg-done { margin-right: auto; color: var(--ink-2); font-size: 14px; }
+.nextbar .btn { min-height: 46px; padding: 8px 18px; }
+.nextbar[hidden], .controls[hidden], .inputrow[hidden] { display: none; }
 .inputrow { display: flex; gap: 6px; align-items: flex-end; }
 .inputrow textarea {
   flex: 1; min-width: 0; resize: none; min-height: 46px; max-height: 140px;
@@ -333,7 +337,12 @@ aside.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
       </div>
     </div>
 
-    <div class="controls">
+    <div class="nextbar" id="nextBar" hidden>
+      <span class="msg-done">장면이 끝났어요.</span>
+      <button class="btn" data-act="result">해설 다시 보기</button>
+      <button class="btn primary" data-act="next">다음 장면 →</button>
+    </div>
+    <div class="controls" id="controls">
       <button class="btn small" id="btnHint">💡 힌트</button>
       <button class="btn small" id="btnPause" title="글자 출력과 음성을 멈춥니다">⏸ 멈춤</button>
       <button class="btn small" id="btnWrap" title="지금까지의 대화로 장면을 끝냅니다">이 장면 마무리</button>
@@ -2373,7 +2382,15 @@ function speak(reply) {
 }
 
 function setStatus(html) { $('status').innerHTML = html || ''; }
+// 장면이 끝나면 입력창 대신 "다음 장면" 버튼을 보여준다
+function setPhaseUI() {
+  const done = !!(G.cur && G.cur.phase === 'result');
+  $('nextBar').hidden = !done;
+  $('controls').hidden = done;
+  $('inputForm').hidden = done;
+}
 function setInputEnabled(on) {
+  setPhaseUI();
   for (const id of ['input', 'btnSend', 'btnHint', 'btnWrap', 'btnMic']) $(id).disabled = !on;
   if (on && !Voice.canListen()) $('btnMic').disabled = true;
 }
@@ -2512,7 +2529,9 @@ async function onSend() {
   setInputEnabled(false);
   if (res.reply) await speak(res.reply);
   let end = res.end;
-  if (!end && ss.turns >= (sc.maxTurns || 9)) {
+  const max = sc.maxTurns || 9;
+  if (!end && ss.turns === max - 2) showToast(`이 장면은 곧 마무리돼요. 대화 ${max - ss.turns}번 남았어요.`);
+  if (!end && ss.turns >= max) {
     await speak(sc.timeout);
     Object.assign(ss.c, sc.timeoutSet || {});
     end = true;
@@ -2537,6 +2556,7 @@ async function endScene() {
   const ss = G.cur.ss;
   if (sc.endSay) { const l = sc.endSay(ss, G.st); if (l) await speak(l); }
   addLog({ t: 'end' });
+  $('toast').hidden = true;
   const o = judge(sc, ss, G.st);
   const r = applyOutcome(sc, ss, G.st, o);
   G.cur.phase = 'result';
