@@ -30,6 +30,7 @@
 - 인물 그림은 배경이 투명해야 장면 위에 자연스럽게 섭니다. 흰 배경 그림은 `tools/remove_bg.py`로 배경을 지울 수 있습니다.
 - 표정 그림이 없으면 `캐릭터id_normal.png`를 씁니다. 그것도 없으면 색깔 도형이 나옵니다.
 - 표정이 바뀌면 인물이 살짝 움직이고, 화남·재촉·단호 표정에서는 흔들립니다.
+- 배경은 장면마다 `bg` 이름으로 정합니다. `img/bg_이름.png`가 있으면 그것을, 없으면 `img/bg_이름.svg`(코드로 그린 기본 배경, `tools/draw_backgrounds.py`)를 씁니다. `bgTint`로 밤·저녁·경고 색조를 입힐 수 있습니다.
 - 사칭 메일 장면도 Dana의 그림을 그대로 씁니다. 겉모습으로는 구별할 수 없다는 점이 학습 포인트입니다.
 
 ## 음성
@@ -85,6 +86,7 @@
   avoided: st => st.flags.docsCrossChecked === true,       // 복기 화면 "피한 사고" 판정
   avoidNote: '서류를 대조해서 이 사고를 피했다.',
   transition: '3일 뒤',
+  bg: 'la_terminal', bgTint: 'evening',                    // 배경 img/bg_la_terminal.(png|svg), 색조(선택)
   situation: '화면에 보여줄 상황 설명',
   opening: L('angry', '(표정·행동) 첫 대사'),               // L(표정, 대사, { sub: 번역 })
   facts: ['이 장면에서 지켜야 할 무역 사실'],

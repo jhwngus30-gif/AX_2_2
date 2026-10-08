@@ -82,21 +82,18 @@ header.top h1 small { font-weight: 400; color: var(--ink-2); font-size: 12px; ma
 }
 @media (max-width: 900px) { .scene { height: min(66dvh, 600px); min-height: 420px; border-radius: 12px; } }
 
-/* 배경: img/bg_이름.png 가 있으면 그림, 없으면 그라데이션 */
-.scene .bg { position: absolute; inset: 0; z-index: -2; transition: opacity .4s; }
-.scene .bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, transparent 40%, rgba(0,0,0,.28) 100%); }
-.scene[data-bg="office"] .bg { background: url(img/bg_office.png) center/cover no-repeat, linear-gradient(180deg, #c9d6e2 0%, #e6ecf0 30%, #eef1f2 60%, #b7a38a 60%, #9f8a70 100%); }
-.scene[data-bg="meeting"] .bg { background: url(img/bg_meeting.png) center/cover no-repeat, linear-gradient(180deg, #cfdcd6 0%, #e9efeb 62%, #8b9b90 62%, #76867b 100%); }
-.scene[data-bg="bank"] .bg { background: url(img/bg_bank.png) center/cover no-repeat, linear-gradient(180deg, #ddd7c9 0%, #efebe2 64%, #7b776a 64%, #67645a 100%); }
-.scene[data-bg="mail"] .bg { background: url(img/bg_mail.png) center/cover no-repeat, linear-gradient(160deg, #2a3d60 0%, #3f5b89 55%, #22304a 100%); }
-.scene[data-bg="shady"] .bg { background: url(img/bg_shady.png) center/cover no-repeat, linear-gradient(160deg, #3a2e20 0%, #6b5431 55%, #261e16 100%); }
-.scene[data-bg="phone"] .bg { background: url(img/bg_port.png) center/cover no-repeat, linear-gradient(180deg, #9cc1da 0%, #d4e5ee 56%, #5e7c8e 56%, #4a6374 100%); }
-/* 화상회의·메일 느낌의 격자 */
-.scene[data-bg="mail"] .bg::before, .scene[data-bg="shady"] .bg::before {
-  content: ""; position: absolute; inset: 0;
-  background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
-  background-size: 32px 32px;
+/* 배경: 장면의 bg 이름으로 img/bg_이름.png → img/bg_이름.svg 순서로 찾고, 없으면 그라데이션 */
+.scene .bg {
+  position: absolute; inset: 0; z-index: -2;
+  background: linear-gradient(180deg, #cfd9e3 0%, #e8edf1 60%, #b9a891 60%, #a08b72 100%);
+  background-size: cover; background-position: center; transition: background-image .3s;
 }
+.scene .bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, transparent 45%, rgba(0,0,0,.25) 100%); }
+/* 같은 장소라도 시간대·분위기를 색조로 바꾼다 (bgTint) */
+.scene .bg::before { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .4s; }
+.scene[data-tint="night"] .bg::before { background: #0d1530; mix-blend-mode: multiply; opacity: .62; }
+.scene[data-tint="evening"] .bg::before { background: linear-gradient(180deg, #f08a4b, #7a3d5c); mix-blend-mode: multiply; opacity: .5; }
+.scene[data-tint="alert"] .bg::before { background: #b3412e; mix-blend-mode: multiply; opacity: .35; }
 
 /* 인물: 화면 아래쪽에 크게 선다 */
 .portrait {
@@ -312,8 +309,8 @@ aside.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 
 <main class="layout">
   <section class="stage" aria-label="게임 화면">
-    <div class="scene" id="scene" data-bg="office">
-      <div class="bg" aria-hidden="true"></div>
+    <div class="scene" id="scene">
+      <div class="bg" id="sceneBg" aria-hidden="true"></div>
       <!-- 인물 영역: img/캐릭터id_표정.png -->
       <div class="portrait" id="portrait"></div>
       <div class="hud">
@@ -465,6 +462,7 @@ function recovery(o) {
 
   return {
     id: o.id, title: o.title, type: '수습', character: 'moon', priority: 100, resolves: o.resolves,
+    bg: o.bg || 'meeting', bgTint: o.bgTint,
     when: st => st.incidents.some(i => i.id === o.resolves && !i.resolved),
     transition: o.transition || '그날 오후, 작은 회의실',
     situation: o.situation,
@@ -495,6 +493,7 @@ const SCENES = [
 /* ==================== 본편 1. 문의 ==================== */
 {
   id: 'm_inquiry', title: '첫 문의 메일', type: '본편', stage: '문의', character: 'han', priority: 0,
+  bg: 'office',
   when: st => st.stage === '문의',
   transition: '입사 3주 차, 월요일 아침',
   situation:
@@ -576,6 +575,7 @@ and confirm that your facility is FDA registered."
 /* ==================== 사고: 등록비 선입금 사기 ==================== */
 {
   id: 'i_reed', title: '20컨테이너의 유혹', type: '사고', character: 'marcus', priority: 50,
+  bg: 'office', bgTint: 'night',
   when: st => st.stage === '견적',
   cause: [],
   avoided: null,
@@ -680,6 +680,7 @@ recovery({
 /* ==================== 본편 2. 견적 ==================== */
 {
   id: 'm_quote', title: 'CIF 가격 쌓기', type: '본편', stage: '견적', character: 'han', priority: 0,
+  bg: 'office',
   when: st => st.stage === '견적',
   transition: '다음 날 오전',
   situation:
@@ -790,6 +791,7 @@ Dana가 원하는 조건: CIF Los Angeles`,
 /* ==================== 본편 3. 결제협상 ==================== */
 {
   id: 'm_payment', title: '돈은 언제 받나', type: '본편', stage: '결제협상', character: 'dana', priority: 0,
+  bg: 'video_call',
   when: st => st.stage === '결제협상',
   transition: '일주일 뒤, 오전 8시 화상회의',
   situation:
@@ -875,6 +877,7 @@ Dana가 원하는 조건: CIF Los Angeles`,
 /* ==================== 본편 4. 규제확인 ==================== */
 {
   id: 'm_regulation', title: '미국 식품 규제', type: '본편', stage: '규제확인', character: 'han', priority: 0,
+  bg: 'office',
   when: st => st.stage === '규제확인',
   transition: '3일 뒤',
   situation: st =>
@@ -970,6 +973,7 @@ Dana가 원하는 조건: CIF Los Angeles`,
 /* ==================== 사고: 운임 인상 뒤 옛 견적가 ==================== */
 {
   id: 'i_oldprice', title: '그 가격, 아직 유효하죠?', type: '사고', character: 'dana', priority: 40,
+  bg: 'mail',
   when: st => st.flags.quoteHasValidity === false && st.stage === '선적예약',
   cause: ['quoteHasValidity'],
   avoided: st => st.flags.quoteHasValidity === true,
@@ -1063,6 +1067,7 @@ recovery({
 /* ==================== 본편 5. 선적예약 ==================== */
 {
   id: 'm_booking', title: '오 과장의 빠른 전화', type: '본편', stage: '선적예약', character: 'oh', priority: 0,
+  bg: 'port',
   when: st => st.stage === '선적예약',
   transition: st => st.flags.quoteHasValidity === false ? '그날 오후' : '한 달 뒤',
   situation:
@@ -1136,6 +1141,7 @@ recovery({
 /* ==================== 사고: 배를 놓침 ==================== */
 {
   id: 'i_missed', title: '컨테이너가 못 들어갔어요', type: '사고', character: 'oh', priority: 40,
+  bg: 'port', bgTint: 'evening',
   when: st => st.flags.scheduleConfirmed === false && st.stage === '서류작성',
   cause: ['scheduleConfirmed'],
   avoided: st => st.flags.scheduleConfirmed === true,
@@ -1216,6 +1222,7 @@ recovery({
 /* ==================== 본편 6. 서류작성 ==================== */
 {
   id: 'm_docs', title: '서류 세 장', type: '본편', stage: '서류작성', character: 'han', priority: 0,
+  bg: 'office',
   when: st => st.stage === '서류작성',
   transition: st => st.played.includes('i_missed') ? '롤오버 다음 날' : '선적 전날 아침',
   situation: st =>
@@ -1308,6 +1315,7 @@ recovery({
 /* ==================== 사고: 신용장 하자 ==================== */
 {
   id: 'i_lc', title: '하자입니다', type: '사고', character: 'gu', priority: 40,
+  bg: 'bank',
   when: st => st.flags.paymentTerm === '신용장' && st.flags.lcWordingChecked === false && st.stage === '운송중',
   cause: ['paymentTerm', 'lcWordingChecked'],
   avoided: st => st.flags.paymentTerm === '신용장' && st.flags.lcWordingChecked === true,
@@ -1398,6 +1406,7 @@ recovery({
 /* ==================== 사고: 서류 불일치로 통관 보류 ==================== */
 {
   id: 'i_docs', title: '세관이 화물을 잡았다', type: '사고', character: 'han', priority: 40,
+  bg: 'la_terminal',
   when: st => st.flags.docsCrossChecked === false && st.stage === '도착',
   cause: ['docsCrossChecked'],
   avoided: st => st.flags.docsCrossChecked === true,
@@ -1487,6 +1496,7 @@ recovery({
 /* ==================== 사고: 라벨 알레르기 표기 누락 ==================== */
 {
   id: 'i_label', title: 'FDA 통관 거부', type: '사고', character: 'han', priority: 35,
+  bg: 'customs_warehouse',
   when: st => st.flags.labelChecked === false && st.stage === '도착',
   cause: ['labelChecked'],
   avoided: st => st.flags.labelChecked === true,
@@ -1576,6 +1586,7 @@ recovery({
 /* ==================== 사고: 잔금 전 Surrender 요구 ==================== */
 {
   id: 'i_surrender', title: '서렌더 좀 해주세요', type: '사고', priority: 30,
+  bg: 'mail',
   character: st => st.flags.buyerVerified === true ? 'dana' : 'spoof',
   when: st => st.flags.paymentTerm === '선적후' && st.stage === '도착',
   cause: ['paymentTerm', 'buyerVerified'],
@@ -1671,6 +1682,7 @@ From: Dana Carter <dana.carter@harborlane-foods.co>
 /* ==================== 사고: 잔금 미입금 ==================== */
 {
   id: 'i_unpaid', title: '잔금이 안 들어온다', type: '사고', priority: 40,
+  bg: 'mail',
   character: 'dana',
   when: st => st.flags.surrenderedBeforePayment === true && st.stage === '대금회수',
   cause: ['surrenderedBeforePayment'],
@@ -1765,6 +1777,7 @@ recovery({
 /* ==================== 본편 7. 대금회수 ==================== */
 {
   id: 'm_collect', title: '그래서 얼마 남았어?', type: '본편', stage: '대금회수', character: 'han', priority: 0,
+  bg: 'office', bgTint: 'evening',
   when: st => st.stage === '대금회수',
   transition: st => st.played.includes('i_unpaid') ? '한 달 뒤' : '도착 3주 뒤',
   situation: st => { const f = finance(st); return (
@@ -2141,8 +2154,8 @@ function store(key, value) { try { localStorage.setItem(key, value); } catch (e)
 function load(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
 function save() { store(SAVE_KEY, JSON.stringify(G)); }
 
-// 장면 배경: scene.bg 가 있으면 그것, 없으면 등장인물로 정한다
-const BG_OF = { han: 'office', moon: 'meeting', dana: 'mail', spoof: 'mail', marcus: 'shady', gu: 'bank', oh: 'phone' };
+// 장면 배경: scene.bg 가 없으면 등장인물로 정한다
+const BG_OF = { han: 'office', moon: 'meeting', dana: 'video_call', spoof: 'mail', marcus: 'mail', gu: 'bank', oh: 'port' };
 
 // ---- 옆 현황 --------------------------------------------------------
 function renderSide() {
@@ -2203,9 +2216,29 @@ async function renderPortrait(charId, face) {
   if (anim) { el.classList.remove('enter', 'hop', 'shake'); void el.offsetWidth; el.classList.add(anim); }
   shown = { charId, face };
 }
+const bgCache = new Map(); // "office" → 실제로 열린 경로 또는 null
+function resolveBg(key) {
+  if (bgCache.has(key)) return Promise.resolve(bgCache.get(key));
+  const list = [`img/bg_${key}.png`, `img/bg_${key}.svg`];
+  return new Promise(resolve => {
+    let i = 0;
+    const img = new Image();
+    img.onload = () => { bgCache.set(key, list[i]); resolve(list[i]); };
+    img.onerror = () => { i++; if (i < list.length) img.src = list[i]; else { bgCache.set(key, null); resolve(null); } };
+    img.src = list[0];
+  });
+}
+let bgToken = 0;
+async function applyBg(key, tint) {
+  const token = ++bgToken;
+  $('scene').dataset.tint = tint || '';
+  const src = await resolveBg(key);
+  if (token !== bgToken) return;
+  $('sceneBg').style.backgroundImage = src ? `url("${src}")` : '';
+}
 function setBackground() {
   const sc = sceneById(G.cur.sceneId);
-  $('scene').dataset.bg = (sc && sc.bg) || BG_OF[G.cur.charId] || 'office';
+  applyBg((sc && sc.bg) || BG_OF[G.cur.charId] || 'office', sc && sc.bgTint);
 }
 
 // ---- 대사창 ------------------------------------------------------------
@@ -2544,7 +2577,7 @@ function showReview() {
   $('sceneType').className = 'badge 수습';
   $('sceneType').textContent = '완료';
   $('sceneTitle').textContent = '첫 수출 완료';
-  $('scene').dataset.bg = 'office';
+  applyBg('office', 'evening');
   setNameplate(null);
   $('line').textContent = '첫 수출 한 건이 끝났다. 위의 "복기" 버튼으로 다시 볼 수 있다.';
   $('more').hidden = true;
