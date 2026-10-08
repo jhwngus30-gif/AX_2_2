@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>캡틴 스노우볼 무역회사</title>
+<meta name="description" content="마이펫의 이중생활 스노우볼과 함께 제주 당근 수입 한 건을 처음부터 끝까지 진행하며 무역 실무 감각을 익히는 선택형 학습 게임 (개인 학습용 팬 게임)">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* ===== 0. 스타일 ===== */
+:root {
+  --bg: #17201e;
+  --panel: #fffdf8;
+  --ink: #2b2622;
+  --muted: #7a6f66;
+  --line: #e6ddd0;
+  --chip: #f5efe6;
+  --accent: #e2574c;
+  --ok: #2f9e6b;
+  --warn: #d98a1e;
+  --lesson: #fff4d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --panel: #26221f; --ink: #f1ebe4; --muted: #b3a89d; --line: #3f3832;
+    --chip: #322c28; --lesson: #3a3222;
+  }
+}
+:root[data-theme="dark"] {
+  --panel: #26221f; --ink: #f1ebe4; --muted: #b3a89d; --line: #3f3832;
+  --chip: #322c28; --lesson: #3a3222;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  overflow: hidden; -webkit-tap-highlight-color: transparent;
+}
+#app { position: fixed; inset: 0; display: flex; flex-direction: column; max-width: 960px; margin: 0 auto; }
+
+/* 상단 현황 */
+.top {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 8px 12px; background: #0d1413; color: #fff; font-size: 14px;
+}
+.top .logo { font-weight: 800; margin-right: auto; }
+.top .stat { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.rage { width: 90px; height: 10px; border-radius: 99px; background: rgba(255,255,255,.18); overflow: hidden; }
+.rage i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #f7c948, #e2574c); transition: width .4s; }
+.top button {
+  background: rgba(255,255,255,.12); color: #fff; border: 0; border-radius: 8px;
+  padding: 5px 9px; font: inherit; font-size: 13px; cursor: pointer;
+}
+.dots { display: flex; gap: 4px; padding: 6px 12px; background: #0d1413; border-top: 1px solid rgba(255,255,255,.06); }
+.dots span { flex: 1; height: 5px; border-radius: 9px; background: rgba(255,255,255,.15); }
+.dots span.done { background: #f7c948; }
+.dots span.now { background: #e2574c; }
+
+/* 무대 */
+#stage { position: relative; flex: 1; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; transition: background .6s; }
+#place { position: absolute; top: 10px; left: 12px; color: rgba(255,255,255,.85); font-size: 13px; background: rgba(0,0,0,.3); padding: 4px 10px; border-radius: 99px; }
+#portrait { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 26px; min-height: 0; }
+#portrait .face { font-size: clamp(84px, 18vh, 150px); line-height: 1; filter: drop-shadow(0 10px 14px rgba(0,0,0,.4)); }
+#portrait .face.hide { visibility: hidden; }
+.pop { animation: pop .35s ease; }
+@keyframes pop { from { transform: scale(.82) translateY(14px); opacity: .2; } to { transform: none; opacity: 1; } }
+.shake { animation: shake .45s; }
+@keyframes shake { 0%,100% { transform: none; } 20% { transform: translateX(-9px) rotate(-4deg); } 40% { transform: translateX(8px) rotate(3deg); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
+
+#dialog {
+  position: relative; margin: 0 12px 12px; background: var(--panel); border: 3px solid var(--line);
+  border-radius: 16px; padding: 18px 16px 26px; min-height: 118px; box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+#dialog .name { position: absolute; top: -15px; left: 16px; padding: 3px 12px; border-radius: 99px; color: #fff; font-weight: 800; font-size: 14px; }
+#dialog .name:empty { display: none; }
+#dialog .text { font-size: 17px; line-height: 1.65; white-space: pre-wrap; word-break: keep-all; }
+#dialog.narr .text { color: var(--muted); font-style: italic; }
+#dialog .next { position: absolute; right: 14px; bottom: 6px; font-size: 12px; color: var(--muted); animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+
+/* 장소 배경 (그림 파일 없이 CSS로) */
+.bg-sewer   { background: repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 3px, transparent 3px 90px), radial-gradient(ellipse at 50% 120%, #4f7a5a 0, transparent 60%), linear-gradient(#22352f, #0f1a17); }
+.bg-office  { background: repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0 2px, transparent 2px 46px), radial-gradient(circle at 70% 20%, #f7d488 0, transparent 35%), linear-gradient(#5a4632, #2c2219); }
+.bg-port    { background: linear-gradient(transparent 62%, #1f5f8b 62%, #123d5c), radial-gradient(circle at 80% 18%, #ffe9a8 0, transparent 18%), linear-gradient(#8ccbe8, #d7eef7 62%); }
+.bg-bank    { background: repeating-linear-gradient(90deg, rgba(255,255,255,.12) 0 18px, transparent 18px 120px), linear-gradient(#a99be0, #5c4f9c); }
+.bg-portny  { background: linear-gradient(transparent 60%, #2b4a66 60%, #182c3d), repeating-linear-gradient(90deg, #c0503f 0 60px, #d78a2f 60px 120px, #3f7fbf 120px 180px) 0 52% / 100% 12% no-repeat, linear-gradient(#f4a96b, #ffd9a8 60%); }
+.bg-customs { background: repeating-linear-gradient(45deg, rgba(0,0,0,.05) 0 14px, transparent 14px 28px), linear-gradient(#e9dcc2, #b9a37a); }
+.bg-storm   { background: radial-gradient(ellipse at 30% 0, #6b7d8c 0, transparent 50%), linear-gradient(#3b4a57, #1c262e); }
+.bg-party   { background: radial-gradient(circle at 20% 30%, rgba(255,214,102,.55) 0 6%, transparent 7%), radial-gradient(circle at 75% 25%, rgba(255,128,102,.5) 0 5%, transparent 6%), radial-gradient(circle at 55% 70%, rgba(130,210,160,.45) 0 5%, transparent 6%), linear-gradient(#f08a4b, #8f3b2a); }
+
+/* 겹 창 */
+.overlay { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,.5); cursor: default; }
+.overlay[hidden] { display: none; }
+#modal { position: fixed; z-index: 20; }
+.card {
+  background: var(--panel); color: var(--ink); border-radius: 18px; padding: 20px 18px;
+  width: 100%; max-width: 600px; max-height: 100%; overflow: auto; box-shadow: 0 16px 40px rgba(0,0,0,.4);
+}
+.card h2 { margin: 0 0 6px; font-size: 20px; }
+.card h3 { margin: 18px 0 6px; font-size: 16px; }
+.card p { line-height: 1.6; margin: 8px 0; }
+.card .who { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--muted); font-size: 14px; }
+.card .who .f { font-size: 28px; }
+.muted { color: var(--muted); font-size: 13px; }
+.opt {
+  display: block; width: 100%; text-align: left; margin: 10px 0; padding: 12px 14px;
+  border: 2px solid var(--line); border-radius: 12px; background: var(--chip); color: var(--ink);
+  font: inherit; cursor: pointer; transition: border-color .15s, transform .1s;
+}
+.opt:hover, .opt:focus-visible { border-color: var(--accent); outline: none; }
+.opt:active { transform: scale(.99); }
+.opt b { display: block; font-size: 16px; }
+.opt small { display: block; color: var(--muted); margin-top: 3px; font-size: 13px; line-height: 1.45; }
+.btn { background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 11px 20px; font: inherit; font-weight: 800; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); border: 2px solid var(--line); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-top: 14px; }
+.lesson { background: var(--lesson); border-radius: 12px; padding: 12px 14px; margin-top: 8px; line-height: 1.6; }
+.newcards { margin-top: 12px; display: grid; gap: 8px; }
+.tcard { border: 2px dashed var(--line); border-radius: 12px; padding: 10px 12px; font-size: 14px; line-height: 1.5; }
+.tcard b { display: block; font-size: 15px; }
+.tcard.locked { opacity: .45; }
+
+table.doc { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+table.doc th, table.doc td { text-align: left; vertical-align: top; padding: 8px 6px; border-bottom: 1px solid var(--line); line-height: 1.45; }
+table.doc th { color: var(--muted); font-weight: 700; white-space: nowrap; }
+.paper { background: #fffaf0; color: #2b2622; border: 1px solid #e3d6bf; border-radius: 6px; padding: 12px 14px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.6; }
+.paper .h { font-weight: 800; text-align: center; letter-spacing: 2px; margin-bottom: 6px; }
+.num.plus { color: var(--ok); font-weight: 700; }
+.num.minus { color: var(--accent); font-weight: 700; }
+
+/* 서류 대조 미니게임 */
+.cmp { display: grid; gap: 8px; margin-top: 10px; }
+.cmp .item { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.cmp .lab { font-size: 12px; color: var(--muted); font-weight: 700; }
+.cmp .base { font-size: 14px; margin: 2px 0 6px; }
+.cmp .base::before { content: "기준 서류 · "; color: var(--muted); font-size: 12px; }
+.cmp button {
+  width: 100%; text-align: left; font: inherit; font-size: 14px; padding: 7px 9px; border-radius: 8px; cursor: pointer;
+  border: 2px solid var(--line); background: #fffaf0; color: #2b2622; font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+.cmp button::before { content: "송장 · "; color: #9a8c7c; font-family: "Pretendard Variable", system-ui, sans-serif; font-size: 12px; }
+.cmp button.found { border-color: var(--ok); background: #e3f6ec; }
+.cmp button.found::after { content: "  ✔ 불일치"; color: var(--ok); font-weight: 800; }
+.cmp button.nope { border-color: var(--warn); }
+.score { font-weight: 800; }
+
+/* 알림 칩 */
+#toasts { position: absolute; top: 44px; right: 10px; z-index: 30; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; pointer-events: none; }
+.toast { background: var(--panel); color: var(--ink); padding: 6px 12px; border-radius: 99px; font-size: 13px; font-weight: 800; box-shadow: 0 4px 14px rgba(0,0,0,.3); animation: toast 2.8s forwards; }
+@keyframes toast { 0% { opacity: 0; transform: translateY(-6px); } 10%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+
+/* 시작 화면 */
+.title h1 { font-size: 26px; margin: 4px 0 2px; }
+.title .big { font-size: 80px; text-align: center; line-height: 1.1; }
+.grade { font-size: 40px; font-weight: 900; text-align: center; margin: 6px 0; }
+ol.flow { padding-left: 20px; line-height: 1.65; }
+ol.flow li span { color: var(--muted); font-size: 13px; display: block; }
+
+@media (max-width: 520px) {
+  .top { gap: 8px; font-size: 13px; }
+  .rage { width: 60px; }
+  #dialog .text { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <span class="logo">🐰 Flushed Trading Co.</span>
+    <span class="stat" title="회사 자금">💰 <b id="money">$10,000</b></span>
+    <span class="stat" title="스노우볼 분노 게이지 (100이 되면 대폭발)">😡 <span class="rage"><i id="rage"></i></span></span>
+    <button id="btnCards" type="button">🃏 <span id="cardCount">0</span></button>
+    <button id="btnReset" type="button" title="처음부터 다시">↺</button>
+  </header>
+  <div class="dots" id="dots"></div>
+  <main id="stage" class="bg-sewer">
+    <span id="place"></span>
+    <div id="portrait"><div class="face hide" id="face">🐰</div></div>
+    <div id="dialog">
+      <span class="name" id="name"></span>
+      <div class="text" id="text"></div>
+      <span class="next">눌러서 계속 ▼</span>
+    </div>
+    <div class="overlay" id="overlay" hidden></div>
+    <div id="toasts"></div>
+  </main>
+</div>
+<div class="overlay" id="modal" hidden></div>
+
+<script>
+/* ===== 1. 데이터: 등장인물, 용어 카드 ===== */
+const WHO = {
+  n:      { name: '',                 face: '',   color: '#555' },
+  snow:   { name: '스노우볼',          face: '🐰', color: '#e2574c' },
+  gid:    { name: '기젯',              face: '🐩', color: '#d94f9b' },
+  pops:   { name: '포피 할아버지',      face: '🐕', color: '#8a6a4a' },
+  tib:    { name: '타이베리어스',       face: '🦅', color: '#8a5a20' },
+  chloe:  { name: '클로이 · 냥냥은행',  face: '🐱', color: '#7b6cc4' },
+  norman: { name: '노먼',              face: '🐹', color: '#c08a3e' },
+  buddy:  { name: '버디 · 손해보험',    face: '🦮', color: '#3f7fbf' },
+  halla:  { name: '한라 · 깡총농장',    face: '🐴', color: '#2f9e6b' },
+  rex:    { name: '렉스 · 뉴욕세관',    face: '🐕‍🦺', color: '#44515c' },
+  max:    { name: '맥스',              face: '🐶', color: '#3c8dbc' },
+};
+
+const CARDS = [
+  ['inquiry', 'Inquiry (거래 문의)', '가격·수량·조건을 묻는 첫 연락. 문의만으로는 아무 의무도 생기지 않는다.'],
+  ['credit', '신용조회 (Credit Inquiry)', '거래 전에 상대가 실제로 있고 믿을 만한 회사인지 확인하는 일. 주소·실적·사업자 정보, 은행이나 무역보험기관을 통해 확인한다.'],
+  ['firm', 'Firm Offer (확정 청약)', '유효기간이 정해진 오퍼. 기간 안에 그대로 승낙하면 그 순간 계약이 성립한다.'],
+  ['counter', 'Counter Offer (반대 청약)', '조건을 바꿔서 답하는 것. 원래 오퍼를 거절하고 새 오퍼를 내는 것과 같아서 원래 오퍼는 사라진다.'],
+  ['incoterms', 'Incoterms 2020', '운임·보험을 누가 내고, 위험이 어디서 넘어가는지 정한 국제 규칙. 모두 11가지다.'],
+  ['exw', 'EXW (공장인도)', '매도인 창고에서 넘겨받는다. 수출국 내 운송과 수출통관까지 매수인 몫이라 해외 초보에겐 함정이 되기 쉽다.'],
+  ['fob', 'FOB (본선인도)', '수출항에서 배에 실으면 매도인의 의무 끝. 해상운임·보험은 매수인이 내고, 위험도 선적 순간 넘어온다.'],
+  ['cif', 'CIF (운임·보험료 포함)', '매도인이 도착항까지 운임과 최소 보험(ICC(C))을 낸다. 하지만 위험은 FOB처럼 선적항에서 넘어온다.'],
+  ['ddp', 'DDP (관세지급인도)', '매도인이 수입국 관세까지 내고 지정 장소까지 배달한다. 매수인은 편하지만 가격이 가장 비싸다.'],
+  ['icc', 'ICC 적하보험 약관', '(A) 거의 모든 위험, (B) 중간, (C) 화재·침몰·좌초·충돌 같은 큰 사고만. 바닷물 침수는 (C)로 보상되지 않는다.'],
+  ['tt', 'T/T (전신송금)', '은행 송금. 빠르고 싸지만 먼저 보내는 쪽이 위험을 진다. 선금·잔금으로 나눠 위험을 나누기도 한다.'],
+  ['lc', 'L/C (신용장)', '은행이 “서류가 조건과 맞으면 대금을 지급한다”고 약속하는 것. 파는 쪽은 대금을, 사는 쪽은 약속한 서류를 보장받는다.'],
+  ['ci', '상업송장 (Commercial Invoice)', '물건 내역·수량·가격을 적은 대표 서류. 대금 결제와 통관의 기준이 된다.'],
+  ['discrepancy', '하자 (Discrepancy)', '서류가 신용장 조건과 다른 것. 은행은 물건이 아니라 서류만 보고 판단한다. 매수인이 하자를 받아들이면(수리) 지급될 수 있다.'],
+  ['bl', 'B/L (선하증권)', '선사가 발행하는 화물 인수증이자 ‘화물의 열쇠’. 원본을 내야 도착지에서 화물을 내준다.'],
+  ['demurrage', '디머리지 (Demurrage)', '컨테이너를 항구에서 정해진 기간 안에 빼가지 않으면 붙는 지체료. 냉장 컨테이너는 더 비싸다.'],
+  ['lg', 'L/G (화물선취보증서)', 'B/L 원본이 늦을 때 은행 보증으로 화물을 먼저 찾는 서류. 원본을 찾으면 선사에 반납해야 한다.'],
+  ['surrender', 'Surrender B/L', '출발지에서 원본 B/L을 미리 반납해 두고, 도착지에서 원본 없이 화물을 찾는 방식. 원본 분실·지연 걱정이 없다.'],
+  ['hs', 'HS 코드', '전 세계 공통 품목 분류번호. 앞 6자리는 세계 공통이고, 이 번호로 관세율과 필요한 서류가 정해진다. 신선 당근은 0706.10.'],
+  ['phyto', '식물검역증 (Phytosanitary Certificate)', '수출국 정부가 발급하는 ‘병해충 없음’ 증명. 신선 농산물을 들여올 때 필요하다.'],
+  ['co', '원산지증명서 (C/O)', '물건이 어디서 만들어졌는지 증명하는 서류. FTA 특혜관세를 받으려면 원산지를 증명해야 한다.'],
+  ['survey', '검정보고서 (Survey Report)', '사고 뒤 검정인이 손해 원인과 규모를 확인한 보고서. 보험 클레임의 핵심 증거다.'],
+  ['claim', '클레임 (Claim)', '손해를 보상해 달라는 청구. 빨리 통지하고, 사진·손상품·검정보고서 같은 증거를 남겨야 한다.'],
+];
+const CARD = Object.fromEntries(CARDS.map(([id, term, desc]) => [id, { term, desc }]));
+
+const ADJ = { EXW: -0.10, FOB: 0, CIF: 0.35, DDP: 0.60 };
+const INC_LABEL = { EXW: 'EXW Jeju Farm', FOB: 'FOB Busan', CIF: 'CIF New York', DDP: 'DDP New York' };
+const QTY = 5000, SALE_PRICE = 2.6, START_MONEY = 10000;
+
+const fmt = n => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
+const unit = S => +(S.flags.price + ADJ[S.flags.inc]).toFixed(2);
+const goods = S => Math.round(QTY * unit(S));
+const L = (who, text) => [who, text];
+const DO = fn => ({ t: 'do', fn });
+
+/* ===== 2. 장면 데이터 =====
+   단계(steps) 종류
+   - [누가, 대사]                대사 한 줄 (대사는 S => 문자열 함수도 가능)
+   - {t:'doc', title, html}      서류 보여주기
+   - {t:'choice', prompt, options:[{label, sub, run, res, lesson, retry}]}
+   - {t:'lesson', text}          포피 할아버지의 한 줄 (+ 새로 얻은 카드)
+   - {t:'game'}                  서류 대조 미니게임
+   - {t:'do', fn}                상태만 바꾸고 넘어감
+   - S => 단계 | 단계[] | null   상태에 따라 갈라지는 단계
+*/
+const BOOM = [
+  L('snow', '(부들부들) 으… 으아아아아아아!!!'),
+  L('n', '스노우볼 대폭발! 아지트의 의자와 서류가 하늘을 날았다.'),
+  L('gid', '대표님 진정하세요! 당근 주스 드세요! 당근 주스!'),
+  DO(S => { pay('대폭발로 부서진 집기 수리', -200); S.rage = 50; hud(); }),
+];
+
+const CHAPTERS = [
+  /* ---------- 1장 ---------- */
+  { title: '1장 · 하수구 비상회의', place: '뉴욕 지하 · 버려진 동물들 아지트', bg: 'sewer', steps: [
+    L('n', '뉴욕 맨해튼 지하 하수구. ‘버려진 동물들’의 아지트에 비상벨이 울린다.'),
+    L('snow', '다들 모여!! 비상이다, 비상! 우리 당근 창고가… 텅 비었다고!!'),
+    L('norman', '(환풍구에서 툭 떨어지며) 저… 저는 아무것도 안 먹었어요…'),
+    L('snow', '인간들은 우릴 버렸어. 이제 믿을 건 우리 힘뿐이야!'),
+    L('gid', '그래서 제가 준비했어요! (서류 뭉치를 펼치며) 무역회사를 차리는 거예요. 제주도 당근이 그렇게 달고 아삭하대요!'),
+    L('snow', '무역? …좋아! 오늘부터 우린 ‘Flushed Trading Co.’다! 대표는 당연히 나, 캡틴 스노우볼!'),
+    L('pops', '(낡은 소파에서 몸을 일으키며) 끌끌… 무역은 깡으로 하는 게 아니란다, 꼬맹아. 첫 단추는 거래처야.'),
+    L('gid', '당근을 수출하는 곳 세 군데를 찾았어요. 회사 자금은 $10,000이에요!'),
+    { t: 'choice', prompt: '어느 업체부터 연락할까?', options: [
+      { label: '🔥 “초특가! 당근 반값!” 업체', sub: '연락은 메신저로만. 선입금하면 바로 보내준대',
+        run: S => { pay('반값 업체 선입금 (연락 두절)', -2000); mad(35); card('credit'); card('inquiry'); },
+        res: [
+          L('snow', '반값이라고? 당장 보내! $2,000 선입금!'),
+          L('n', '…다음 날, 메신저 계정이 사라졌다.'),
+          L('snow', '으아아아악!!! 내 돈!!! 내 당근!!!'),
+          L('gid', '회사 주소도, 수출 실적도 없는 곳이었어요… 결국 제주 ‘한라 깡총농장’에 다시 문의했어요.'),
+          L('halla', '(영상통화 속 조랑말이 히힝) 반가워요! 샘플은 바로 보내드릴게요. 저희 수출 실적표도 첨부했어요.'),
+        ],
+        lesson: '처음 보는 상대에게 돈부터 보내면 안 된다. 진짜 있는 회사인지(주소·실적·사업자 정보) 먼저 확인하는 것, 그게 신용조회다.' },
+      { label: '🥕 제주 ‘한라 깡총농장’', sub: '홈페이지와 수출 실적이 있음. 먼저 문의하고 샘플을 받아보자',
+        run: S => { pay('샘플 특송비', -100); mad(-10); card('inquiry'); card('credit'); },
+        res: [
+          L('gid', '“안녕하세요, 뉴욕의 Flushed Trading입니다. 당근 5톤 수입을 검토 중이에요. 가격과 조건을 알려주시고, 샘플도 받을 수 있을까요?”'),
+          L('halla', '(영상통화 속 조랑말이 히힝) 반가워요! 샘플은 특송으로 바로 보낼게요. 저희 수출 실적표도 첨부했어요.'),
+          L('pops', '옳지. 문의는 공짜고, 아무 의무도 안 생긴다. 궁금한 건 실컷 물어봐.'),
+        ],
+        lesson: '첫 단추는 문의(Inquiry) → 샘플 → 신용조회. 문의만으로는 계약이 생기지 않으니 마음껏 물어봐도 된다.' },
+      { label: '🤷 세 군데 다 주문서부터 보내기', sub: '제일 먼저 답 오는 곳이랑 하면 되지!',
+        run: S => { pay('중복 주문 취소 위약금', -300); mad(15); card('inquiry'); },
+        res: [
+          L('snow', '고민은 사치야! 세 군데 다 “5톤 주문합니다!” 전송!'),
+          L('n', '…세 군데 모두에서 “주문 확인했습니다. 출고 준비할게요!” 답장이 왔다.'),
+          L('gid', '대, 대표님! 주문(Order)은 그냥 물어보는 게 아니라 ‘사겠다’는 약속이 될 수 있어요. 두 곳에 취소 위약금을 물어야 해요…'),
+          L('snow', '…그럼 남은 데가 제주 ‘한라 깡총농장’이지? 거기로 해!'),
+        ],
+        lesson: '“얼마예요?”(문의)와 “살게요!”(주문)는 다르다. 조건을 다 정하기 전에 주문부터 보내면 계약이 성립해 버릴 수 있다.' },
+    ] },
+  ] },
+
+  /* ---------- 2장 ---------- */
+  { title: '2장 · 오퍼가 도착했다', place: '아지트 사무실', bg: 'office', steps: [
+    L('n', '일주일 뒤. 제주에서 샘플 당근이 도착했다.'),
+    L('snow', '(아삭!) …이거야. 이 맛이야!! 다들 먹어봐!'),
+    L('norman', '(아삭아삭아삭아삭아삭)'),
+    L('gid', '한라 깡총농장에서 정식 오퍼(Offer)가 왔어요!'),
+    { t: 'doc', title: '📄 농장이 보낸 오퍼', html: () => `
+      <div class="paper"><div class="h">OFFER</div>
+      From: Halla Kkangchong Farm (Jeju, Korea)<br>
+      To: Flushed Trading Co. (New York, USA)<br><br>
+      Item: Fresh Jeju Carrots<br>
+      Quantity: 5,000 kg<br>
+      Price: USD 1.00 per kg, FOB Busan<br>
+      Shipment: within 30 days after contract<br>
+      <b>This offer is firm until Oct 20.</b></div>
+      <p class="muted">“firm until Oct 20” = 10월 20일까지 이 조건을 바꾸지 않겠다는 약속</p>` },
+    L('snow', '$1이라고? 당장 OK 보내! …아니 잠깐. 좀 깎을 수 있지 않나?'),
+    L('pops', '잘 봐라. ‘firm until Oct 20’, 유효기간이 박힌 확정 오퍼(Firm Offer)다. 기간 안에 그대로 승낙하면 그 순간 계약이 성립해.'),
+    L('gid', '조건을 바꿔서 답하면 그건 승낙이 아니라 ‘카운터오퍼’가 된대요.'),
+    { t: 'choice', prompt: '오퍼에 어떻게 답할까?', options: [
+      { label: '✅ 그대로 승낙', sub: '“We accept your offer.” 깔끔하게 계약!',
+        run: S => { S.flags.price = 1.00; mad(-5); card('firm'); },
+        res: [
+          L('snow', 'We accept your offer! …맞지? 이렇게 쓰는 거 맞지?'),
+          L('halla', '히힝! 계약 성립이에요. 잘 부탁드려요, 캡틴!'),
+        ],
+        lesson: '확정 오퍼를 유효기간 안에 그대로 승낙하면 그 순간 계약이 성립한다. 단순하고 확실하다.' },
+      { label: '💬 카운터오퍼: “$0.90이면 바로 계약할게요”', sub: '조금만 깎아보자',
+        run: S => { S.flags.price = 0.95; mad(-5); card('counter'); card('firm'); },
+        res: [
+          L('gid', '“$0.90/kg이면 바로 계약하겠습니다.” 보냈어요!'),
+          L('halla', '음… 0.90은 어렵고, 0.95까지는 맞춰드릴게요. 이건 제 새 오퍼예요!'),
+          L('snow', '0.95! 승낙! 5톤이면 $250 아꼈다!'),
+          L('pops', '허허, 제법이구나. 카운터오퍼를 보내는 순간 원래 오퍼는 사라진다는 것도 기억해 둬라.'),
+        ],
+        lesson: '조건을 바꿔 답하면(카운터오퍼) 원래 오퍼를 거절한 셈이 되고 새 오퍼가 된다. 협상은 이렇게 오퍼를 주고받으며 이뤄진다.' },
+      { label: '😎 “$0.80 아니면 안 해!” 버티기', sub: '어차피 원래 가격은 언제든 받아주겠지?',
+        run: S => { S.flags.price = 1.10; mad(20); card('counter'); card('firm'); },
+        res: [
+          L('snow', '“0.80 아니면 안 한다!” 보내고… 기다려. 우리가 갑이야.'),
+          L('n', '…답장은 오지 않았고, 10월 20일이 지났다.'),
+          L('snow', '그, 그럼 처음 가격 $1.00으로 할게!'),
+          L('halla', '어머, 그 오퍼는 이미 끝났어요. 카운터오퍼를 보내신 순간 사라졌고 유효기간도 지났고요. 지금 시세로는 $1.10이에요.'),
+          L('snow', '끄아아악!!'),
+        ],
+        lesson: '카운터오퍼를 보내면 원래 오퍼는 사라진다. 나중에 “처음 조건으로 할게요”라고 해도 상대는 받아줄 의무가 없다.' },
+    ] },
+  ] },
+
+  /* ---------- 3장 ---------- */
+  { title: '3장 · 인코텀즈 대작전', place: '부산항 상공', bg: 'port', steps: [
+    L('n', '계약서를 마저 채울 시간. 하늘 위로 커다란 그림자가 지나간다.'),
+    L('tib', '(휘이익) 물류라면 이 몸, 타이베리어스! 부산에서 뉴욕까지 냉장 컨테이너로 모셔다드리지.'),
+    L('gid', '계약서에 무역조건, 인코텀즈를 정해야 해요. 운임이랑 보험은 누가 내는지, 물건이 망가지면 누가 책임지는지 정하는 규칙이에요.'),
+    L('snow', '복잡해!! 그냥 제일 싼 걸로 해!'),
+    L('pops', '싼 데는 다 이유가 있는 법이지. 농장이 보낸 조건별 가격표를 봐라.'),
+    { t: 'doc', title: '📊 조건별 가격표 (kg당)', html: S => {
+      const p = S.flags.price;
+      const r = (k, desc) => `<tr><th>${k}<br><span class="muted">$${(p + ADJ[k]).toFixed(2)}</span></th><td>${desc}</td></tr>`;
+      return `<table class="doc">
+        ${r('EXW', '제주 농장 창고에서 넘겨받음. 한국 안의 트럭, 한국 수출통관, 해상운임, 보험 <b>전부 우리가</b>')}
+        ${r('FOB', '부산항에서 배에 실을 때까지는 농장. <b>해상운임·보험은 우리가</b>')}
+        ${r('CIF', '뉴욕항까지 운임과 <b>최소 보험</b>은 농장이. 단, <b>위험은 부산에서 배에 실을 때 우리에게</b>')}
+        ${r('DDP', '미국 관세까지 내고 아지트 문 앞까지 <b>농장이 전부</b>')}
+      </table>
+      <p class="muted">해상운임(냉장 컨테이너)은 약 $1,500. EXW·FOB이면 우리가 따로 낸다.</p>`;
+    } },
+    { t: 'choice', prompt: '어떤 조건으로 계약할까?', options: [
+      { label: 'EXW · 공장인도', sub: '가격표상 제일 싸다!',
+        run: S => { S.flags.inc = 'EXW'; pay('한국 내 트럭·수출통관 대행비', -900); mad(15); card('exw'); card('incoterms'); },
+        res: [
+          L('snow', '제일 싼 EXW! 농장 창고에서 가져오기만 하면 되잖아!'),
+          L('tib', '어이, 캡틴. 제주 농장에서 부산항까지 트럭은? 한국 수출통관은? 뉴욕 하수구에서 그걸 다 할 수 있겠어?'),
+          L('gid', '결국 한국 대행업체에 맡겼어요… 대행비가 $900 나왔어요.'),
+          L('snow', 'kg당 10센트 아끼려다가…!'),
+        ],
+        lesson: 'EXW는 가격표는 가장 싸지만, 수출국 안의 운송과 수출통관까지 사는 쪽이 맡는다. 해외 초보 수입자에겐 함정이 되기 쉽다.' },
+      { label: 'FOB · 본선인도 (부산)', sub: '오퍼 그대로. 운임·보험은 우리가 고른다',
+        run: S => { S.flags.inc = 'FOB'; mad(-5); card('fob'); card('incoterms'); },
+        res: [
+          L('snow', 'FOB 부산! 배에 실리는 순간부터 우리 거다!'),
+          L('tib', '좋아. 해상운임은 도착하면 청구하지. 보험은 너희가 직접 들어야 한다?'),
+        ],
+        lesson: 'FOB는 수출항에서 배에 실리는 순간 비용과 위험이 사는 쪽으로 넘어온다. 운임과 보험은 사는 쪽이 골라서 낸다.' },
+      { label: 'CIF · 운임·보험료 포함 (뉴욕)', sub: '운임과 보험을 농장이 챙겨준다',
+        run: S => { S.flags.inc = 'CIF'; mad(-5); card('cif'); card('incoterms'); },
+        res: [
+          L('snow', 'CIF 뉴욕! 운임에 보험까지 농장이 다 해준다니 완벽해!'),
+          L('pops', '잠깐. CIF라도 위험은 부산에서 배에 실을 때 이미 너한테 넘어온다. 농장이 들어주는 보험도 최소 조건뿐이고.'),
+          L('snow', '…뭐? 돈은 농장이 내는데 위험은 내 거라고?'),
+        ],
+        lesson: 'CIF는 매도인이 도착항까지 운임과 최소 보험을 내지만, 위험은 FOB와 똑같이 선적항에서 넘어온다. “누가 돈을 내나”와 “누가 위험을 지나”는 다르다.' },
+      { label: 'DDP · 관세지급인도 (아지트)', sub: '관세까지 내고 문 앞까지! 대신 제일 비싸다',
+        run: S => { S.flags.inc = 'DDP'; card('ddp'); card('incoterms'); },
+        res: [
+          L('snow', 'DDP! 관세까지 내고 문 앞까지! 난 아무것도 안 해도 돼!'),
+          L('halla', '편하신 대신 가격이 제일 비싸요. 미국 통관도 저희가 맡아야 해서 준비할 게 많네요. 히힝.'),
+          L('gid', '편하긴 한데… kg당 60센트를 더 내는 거예요.'),
+        ],
+        lesson: 'DDP는 매도인이 수입국 관세까지 내고 문 앞까지 배달한다. 사는 쪽은 편하지만 그만큼 가격이 가장 비싸다.' },
+    ] },
+    S => {
+      if (S.flags.inc === 'DDP') {
+        S.flags.ins = 'seller';
+        return [L('pops', 'DDP면 아지트에 도착할 때까지 위험도 농장 몫이다. 보험도 농장이 알아서 하겠지.')];
+      }
+      const iccDoc = { t: 'doc', title: '🛡️ 적하보험 약관 (ICC)', html: `
+        <table class="doc">
+          <tr><th>ICC(A)</th><td>거의 모든 위험 보상 (넓다)</td></tr>
+          <tr><th>ICC(B)</th><td>(C) + 지진, 바닷물·강물 침수 등</td></tr>
+          <tr><th>ICC(C)</th><td>화재·폭발, 침몰·좌초, 충돌 같은 <b>큰 사고만</b> (좁다)</td></tr>
+        </table>
+        <p class="muted">보험은 사고가 나기 전에만 들 수 있다.</p>` };
+      const lesson = '적하보험은 사고가 나기 전에만 들 수 있고, 약관(A/B/C)에 따라 보상 범위가 크게 다르다. 싼 보험은 그만큼 보상받는 경우가 적다.';
+      if (S.flags.inc === 'CIF') return [
+        L('gid', 'CIF에서 농장은 최소 조건인 ICC(C)만 들어주면 돼요. 추가 비용을 내면 ICC(A)로 올려달라고 할 수 있대요.'),
+        iccDoc,
+        { t: 'choice', prompt: '보험 조건은?', options: [
+          { label: '🛡️ ICC(A)로 올려달라고 요청', sub: '추가 보험료 $70',
+            run: S => { S.flags.ins = 'A'; pay('보험 조건 상향 (ICC(C)→(A))', -70); card('icc'); },
+            res: [L('halla', 'ICC(A)로 바꿔서 들게요. 증권은 선적서류랑 같이 보내드릴게요!')], lesson },
+          { label: '그냥 최소 조건 ICC(C)로', sub: '추가 비용 없음',
+            run: S => { S.flags.ins = 'C'; card('icc'); },
+            res: [L('snow', '공짜로 들어준다는데 뭘 더 내!')], lesson },
+        ] },
+      ];
+      return [
+        L('tib', '보험은 너희 몫이야. 어떤 걸로 들래?'),
+        iccDoc,
+        { t: 'choice', prompt: '적하보험을 어떻게 들까?', options: [
+          { label: '🛡️ ICC(A) 들기', sub: '보험료 $120. 넓게 보상',
+            run: S => { S.flags.ins = 'A'; pay('적하보험료 ICC(A)', -120); card('icc'); },
+            res: [L('gid', 'ICC(A)로 가입했어요. 증권 받았어요!')], lesson },
+          { label: 'ICC(C) 들기', sub: '보험료 $50. 큰 사고만 보상',
+            run: S => { S.flags.ins = 'C'; pay('적하보험료 ICC(C)', -50); card('icc'); },
+            res: [L('gid', 'ICC(C)로 가입했어요.')], lesson },
+          { label: '🙈 보험 안 들기', sub: '설마 무슨 일 있겠어?',
+            run: S => { S.flags.ins = 'none'; mad(5); card('icc'); },
+            res: [L('snow', '설마 배가 가라앉기라도 하겠어? 안 들어!'), L('pops', '…끌끌.')], lesson },
+        ] },
+      ];
+    },
+  ] },
+
+  /* ---------- 4장 ---------- */
+  { title: '4장 · 냥냥은행의 클로이', place: '뉴욕 냥냥은행', bg: 'bank', steps: [
+    L('n', '계약서의 마지막 빈칸은 ‘결제 조건’이다.'),
+    L('halla', '대금은 어떻게 보내주실 건가요? 처음 거래니까 확실한 방법이면 좋겠어요.'),
+    L('n', '아지트 근처, 뉴욕 냥냥은행.'),
+    L('chloe', '(하품) …냥냥은행입니다. 송금이요, 신용장이요? 빨리 골라요. 곧 낮잠 시간이라.'),
+    L('gid', '송금(T/T)은 빠르고 싸지만, 먼저 보내는 쪽이 위험해요. 신용장(L/C)은 은행이 “서류만 맞으면 돈을 준다”고 보증하는 거고요.'),
+    L('gid', S => `물건값은 kg당 $${unit(S).toFixed(2)} × 5,000kg = 총 ${fmt(goods(S))}이에요.`),
+    { t: 'choice', prompt: '결제 조건을 고르자', options: [
+      { label: '💸 T/T 100% 선불', sub: '지금 전액 송금. 농장은 대환영',
+        run: S => { S.flags.pay = 'TT100'; pay('물건값 (T/T 선불 100%)', -goods(S)); mad(5); card('tt'); },
+        res: [
+          L('snow', '통 크게 전액 선불!'),
+          L('chloe', '송금 완료. …돈 보냈는데 물건이 안 와도 그건 냥냥은행 책임 아니에요. 냥.'),
+          L('pops', '한라 농장이 믿을 만한 곳이라 다행이지. 처음 보는 상대였으면 위험한 선택이었다.'),
+        ],
+        lesson: '전액 선불 송금은 사는 쪽이 모든 위험을 진다. 상대를 충분히 믿을 수 있을 때만 쓰자.' },
+      { label: '🏦 L/C (신용장) 개설', sub: '은행 수수료 $150. 서류가 조건과 맞아야 돈이 나간다',
+        run: S => { S.flags.pay = 'LC'; pay('신용장 개설 수수료', -150); mad(-5); card('lc'); },
+        res: [
+          L('chloe', '신용장 열어드릴게요. 농장이 선적하고 서류를 보내면, 신용장 조건이랑 한 글자 한 글자 대조할 거예요. 냥.'),
+          L('halla', '신용장이면 안심이죠! 바로 선적 준비할게요.'),
+        ],
+        lesson: '신용장은 은행이 “서류가 조건과 맞으면 대금을 지급한다”고 약속하는 것. 파는 쪽은 대금을, 사는 쪽은 약속한 서류를 보장받는다.' },
+      { label: '⚖️ T/T 선금 30% + 잔금 70%', sub: '선금으로 성의를 보이고, 선적서류 사본을 확인한 뒤 잔금',
+        run: S => { S.flags.pay = 'TT30'; pay('물건값 선금 30%', -Math.round(goods(S) * 0.3)); mad(-5); card('tt'); },
+        res: [
+          L('gid', '선금 30%를 먼저 보내고, 선적 뒤 서류 사본을 확인하면 나머지 70%를 보낼게요.'),
+          L('halla', '좋아요! 서로 위험을 나누는 방식이네요.'),
+        ],
+        lesson: '선금 + 잔금 방식은 양쪽이 위험을 나눠 진다. 실무에서 아주 흔하게 쓰는 절충안이다.' },
+      { label: '🙅 T/T 100% 후불', sub: '당근 받아서 맛보고 줄게!', retry: true,
+        run: S => { mad(10); },
+        res: [
+          L('snow', '물건 받고 줄게! 맛없으면 안 줄 거야!'),
+          L('halla', '히힝… 처음 거래하는 해외 업체에 외상은 어려워요. 다른 방법으로 해주세요.'),
+          L('snow', '쳇.'),
+        ],
+        lesson: '전액 후불은 파는 쪽이 모든 위험을 진다. 처음 거래에서는 받아들여지기 어렵다.' },
+    ] },
+  ] },
+
+  /* ---------- 5장 ---------- */
+  { title: '5장 · 서류 틀린그림찾기', place: S => S.flags.pay === 'LC' ? '뉴욕 냥냥은행 · 서류 심사 창구' : '아지트 사무실', bg: S => S.flags.pay === 'LC' ? 'bank' : 'office', steps: [
+    L('n', '2주 뒤. 당근을 실은 배가 부산항을 떠났다. 농장이 선적서류를 보냈다.'),
+    S => S.flags.pay === 'LC' ? [
+      L('chloe', '서류 왔어요. 신용장이랑 대조해 봤는데… (안경을 고쳐 쓰며) 이상한 데가 있네요. 냥.'),
+      L('chloe', '은행은 당근을 안 봐요. 서류만 봐요. 대표님도 같이 찾아봐요.'),
+    ] : [
+      L('gid', '상업송장(Commercial Invoice)이 왔어요! 통관에 쓸 서류라서 계약서랑 꼭 대조해야 해요.'),
+      L('snow', '그런 건 대충…'),
+      L('pops', '대충 했다간 세관에서 혼쭐난다. 같이 찾아봐라.'),
+    ],
+    { t: 'game' },
+    S => {
+      const m = S.flags.docMissed, out = [];
+      if (m === 0) out.push(
+        L('gid', '틀린 곳 세 군데를 다 찾았어요! 농장에 정정 서류를 요청했어요.'),
+        L('halla', '앗, 죄송해요! 바로 고쳐서 보낼게요.'));
+      else out.push(
+        L('snow', S.flags.pay === 'LC' ? '남은 건 그냥 받아들여! 빨리 돈 주고 끝내!' : '이 정도면 됐지 뭐! 넘어가!'),
+        L('pops', `못 찾은 게 ${m}군데 남았다… 틀린 송장은 그대로 세관까지 간다.`));
+      if (S.flags.pay === 'LC') out.push(
+        L('chloe', m === 0 ? '정정 서류 확인 완료. 하자 없음. 대금 지급할게요. 냥.' : '대표님이 남은 하자를 받아들이셨으니(수리) 지급할게요. 책임은 대표님 몫이에요. 냥.'),
+        DO(S => pay('물건값 (신용장 결제)', -goods(S))));
+      if (S.flags.pay === 'TT30') out.push(
+        L('gid', '선적서류 사본도 확인했어요. 잔금 70% 보낼게요.'),
+        DO(S => pay('물건값 잔금 70%', -(goods(S) - Math.round(goods(S) * 0.3)))));
+      out.push({ t: 'lesson', text: '서류는 계약서·신용장과 글자 하나까지 맞아야 한다. 은행도 세관도 물건이 아니라 서류를 보고 판단한다.' });
+      return out;
+    },
+  ] },
+
+  /* ---------- 6장 ---------- */
+  { title: '6장 · 노먼이 사라졌다!', place: '뉴욕항 컨테이너 터미널', bg: 'portny', steps: [
+    L('n', '뉴욕항. 당근을 실은 배가 도착했다!'),
+    S => (S.flags.inc === 'FOB' || S.flags.inc === 'EXW') ? [
+      L('tib', '도착이다! 자, 해상운임 청구서. 냉장 컨테이너 $1,500.'),
+      DO(S => pay('해상운임 (냉장 컨테이너)', -1500)),
+    ] : null,
+    L('tib', '이제 선하증권, B/L 원본을 선사에 내고 컨테이너를 찾아가라고.'),
+    L('snow', 'B/L 원본! 노먼! 노먼한테 맡겼지?'),
+    L('gid', '네… 아지트에서 항구까지 가져오기로 했는데…'),
+    L('norman', '(환풍구 저 멀리서 메아리) 여긴… 어디지이… 왼쪽이었나아…'),
+    L('snow', '노오오오먼!!!'),
+    L('pops', 'B/L은 화물의 열쇠다. 원본이 없으면 선사는 물건을 안 내준다. 냉장 컨테이너를 항구에 오래 둘수록 지체료가 붙고.'),
+    { t: 'choice', prompt: '화물을 어떻게 찾을까?', options: [
+      { label: '🔦 환풍구를 다 뒤져서 노먼 찾기', sub: '언젠간 나오겠지…',
+        run: S => { pay('디머리지·보관료 (5일 지연)', -600); mad(15); card('bl'); card('demurrage'); },
+        res: [
+          L('n', '5일 뒤. 먼지투성이 노먼이 B/L을 꼭 쥔 채 발견됐다.'),
+          L('norman', '저… 이거 끝까지 지켰어요…'),
+          L('tib', '그 사이 지체료가 $600 붙었다. 냉장 컨테이너는 비싸거든.'),
+        ],
+        lesson: 'B/L 원본이 없으면 화물을 못 찾는다. 기다리는 동안 항구 지체료(디머리지)가 쌓인다.' },
+      { label: '🏦 은행 보증으로 L/G 받아 먼저 찾기', sub: '화물선취보증서. 은행 수수료 $100',
+        run: S => { pay('L/G(화물선취보증서) 발급 수수료', -100); mad(-5); card('bl'); card('lg'); },
+        res: [
+          L('chloe', '(하품) 화물선취보증서 발급해 드릴게요. 원본 B/L 찾으면 꼭 선사에 돌려줘야 해요. 냥.'),
+          L('tib', 'L/G 확인! 컨테이너 내줄게.'),
+          L('norman', '(이틀 뒤, 환풍구에서 툭) …저 왔어요.'),
+        ],
+        lesson: 'B/L 원본이 늦거나 없을 때는 은행 보증(L/G)으로 화물을 먼저 찾을 수 있다. 원본을 찾으면 선사에 반납해야 한다.' },
+      { label: '📢 선사에 “그냥 내놔!” 소리치기', sub: '내 당근인데 무슨 서류야!', retry: true,
+        run: S => { mad(20); card('bl'); },
+        res: [
+          L('snow', '내 당근이야! 그냥 내놔!!'),
+          L('tib', '캡틴, 선사는 원본 B/L을 낸 쪽에만 물건을 내준다고. 아무나 와서 내 거라고 하면 어쩌겠어?'),
+        ],
+        lesson: 'B/L은 화물을 넘겨받을 권리를 나타내는 서류다. 선사는 원본을 내는 사람에게만 화물을 넘긴다.' },
+    ] },
+    L('gid', '다음부턴 농장에 ‘서렌더(Surrender) B/L’로 해달라고 할게요. 그러면 원본 없이도 찾을 수 있대요.'),
+    DO(S => card('surrender')),
+  ] },
+
+  /* ---------- 7장 ---------- */
+  { title: '7장 · 세관 탐지견 렉스', place: '뉴욕 세관 검사장', bg: 'customs', steps: [
+    L('n', '뉴욕 세관 검사장. 커다란 셰퍼드가 코를 킁킁거린다.'),
+    L('rex', '세관 탐지견 렉스다. 수입 신고서 내놔. 하나라도 틀리면 통과 없다. 킁킁.'),
+    S => S.flags.inc === 'DDP' ? [L('gid', 'DDP라서 통관은 농장 쪽 업체가 하고 비용도 농장 몫이에요. 그래도 옆에서 같이 배워요!')] : null,
+    L('rex', '첫째. 품목 분류번호, HS 코드는?'),
+    { t: 'choice', prompt: '신선 당근의 HS 코드는?', options: [
+      { label: '0706.10', sub: '당근·순무 (신선하거나 냉장한 것)',
+        run: S => { mad(-5); card('hs'); },
+        res: [L('rex', '정확해. 신선 당근은 제7류, 0706.10이지.')],
+        lesson: 'HS 코드는 전 세계 공통 품목 번호다. 앞 6자리는 세계 공통이고, 이 번호로 관세율과 필요한 서류가 정해진다.' },
+      { label: '2005.90', sub: '조제하거나 보존 처리한 채소',
+        run: S => { cost('HS 코드 정정 신고·지연', -200); mad(10); card('hs'); },
+        res: [
+          L('rex', '킁? 이건 가공한 채소 번호잖아. 생당근을 통조림이라고 신고하는 거냐? 정정해 와.'),
+          L('gid', '바로 정정 신고할게요… 0706.10으로요.'),
+        ],
+        lesson: 'HS 코드는 전 세계 공통 품목 번호다. 같은 당근이라도 신선·가공 여부에 따라 번호가 달라지고, 틀리면 정정 신고와 지연이 생긴다.' },
+      { label: '1214.90', sub: '사료용 식물',
+        run: S => { cost('HS 코드 정정 신고·지연', -200); mad(10); card('hs'); },
+        res: [
+          L('snow', '우리가 먹으니까 사료잖아!'),
+          L('rex', '사람이 먹든 토끼가 먹든 신선 당근은 0706.10이다. 정정해 와.'),
+        ],
+        lesson: 'HS 코드는 누가 먹느냐가 아니라 물건의 성질로 정한다. 틀리면 정정 신고와 지연이 생긴다.' },
+    ] },
+    L('rex', '둘째. 신선 농산물이다. 병해충 검사 서류는?'),
+    { t: 'choice', prompt: '함께 내야 할 서류는?', options: [
+      { label: '🌿 식물검역증 (Phytosanitary Certificate)', sub: '한국 정부가 발급한 병해충 검사 증명',
+        run: S => { mad(-5); card('phyto'); },
+        res: [L('rex', '한국 정부가 발급한 검역증… 확인. 벌레 냄새도 안 나는군. 킁킁.')],
+        lesson: '신선 농산물은 수출국 정부가 발급한 식물검역증이 있어야 들어올 수 있다.' },
+      { label: '📜 원산지증명서', sub: '어디서 왔는지 증명하면 되지 않나?',
+        run: S => { cost('검역증 긴급 특송·보관료', -300); mad(10); card('phyto'); },
+        res: [
+          L('rex', '원산지증명은 어디서 왔는지 증명하는 거고, 검역증은 병해충이 없다는 증명이다. 다른 서류야.'),
+          L('gid', '농장에 급히 요청해서 특송으로 받았어요… 그동안 보관료가 나왔어요.'),
+        ],
+        lesson: '원산지증명서와 식물검역증은 다른 서류다. 신선 농산물은 수출국 정부의 식물검역증이 있어야 들어올 수 있다.' },
+      { label: '🧾 보험증권', sub: '보험 들었으니까 안전하다는 증거!',
+        run: S => { cost('검역증 긴급 특송·보관료', -300); mad(10); card('phyto'); },
+        res: [
+          L('rex', '보험증권은 사고 났을 때 쓰는 거지, 벌레가 없다는 증명이 아니다.'),
+          L('gid', '농장에 식물검역증을 급히 요청했어요… 그동안 보관료가 나왔어요.'),
+        ],
+        lesson: '신선 농산물은 수출국 정부가 발급한 식물검역증이 있어야 들어올 수 있다.' },
+    ] },
+    L('rex', '셋째. 관세. 한국산이면 한미 FTA 특혜세율을 받을 수 있지. 증명할 수 있나?'),
+    { t: 'choice', prompt: '관세는 어떻게 할까?', options: [
+      { label: '📑 원산지증명서 내고 FTA 특혜세율 받기', sub: '농장에 미리 받아둔 서류',
+        run: S => { mad(-5); card('co'); },
+        res: [
+          L('gid', '농장에 원산지증명서를 미리 받아뒀어요!'),
+          L('rex', '확인. 특혜세율 적용, 관세 0. 킁.'),
+        ],
+        lesson: 'FTA 특혜관세는 자동이 아니다. 원산지를 증명해야 받을 수 있다.' },
+      { label: '💵 그냥 일반 관세 내기', sub: '서류 챙기기 귀찮아',
+        run: S => { cost('관세 (일반세율, 게임용 가상 금액)', -350); card('co'); },
+        res: [
+          L('snow', '서류 귀찮아! 그냥 낼게!'),
+          L('pops', '허허… 서류 한 장이면 아낄 돈을…'),
+        ],
+        lesson: 'FTA 특혜관세는 자동이 아니다. 원산지를 증명해야 받을 수 있고, 안 하면 일반세율을 낸다.' },
+    ] },
+    S => S.flags.docMissed > 0 ? [
+      L('rex', '마지막으로… 송장이 이상하다. 받는 회사 이름이나 수량, 도착항이 실제 화물이랑 안 맞는군. 정정하기 전엔 못 내준다!'),
+      DO(S => { cost(`송장 정정·통관 지연 (${S.flags.docMissed}건)`, -150 * S.flags.docMissed); mad(10 * S.flags.docMissed); }),
+      L('snow', '5장에서 넘어간 그거구나…!!'),
+    ] : [L('rex', '송장도 실제 화물과 일치하는군.')],
+    L('rex', '통관 완료. 들어가도 좋다. …그런데 당근 하나만 줄 수 있나? 킁.'),
+  ] },
+
+  /* ---------- 8장 ---------- */
+  { title: '8장 · 폭풍우와 젖은 당근', place: '아지트 창고', bg: 'storm', steps: [
+    L('n', '컨테이너 문을 열자, 바닷물 냄새가 훅 끼쳐왔다.'),
+    L('gid', '대표님… 태평양에서 폭풍을 만나서 컨테이너에 바닷물이 들어왔대요. 당근 500kg이 젖어서 못 팔게 됐어요.'),
+    L('snow', '내… 내 당근이…!!'),
+    S => {
+      if (S.flags.inc === 'DDP') {
+        S.flags.lostKg = 0;
+        return [
+          L('halla', 'DDP니까 아지트에 도착할 때까지는 저희 책임이에요! 젖은 만큼 새 당근으로 채워드릴게요. 히힝.'),
+          L('pops', 'DDP라서 이번엔 농장이 위험을 졌구나. 대신 그만큼 비싼 값을 냈던 거고.'),
+          { t: 'lesson', text: '물건이 망가졌을 때 누가 책임지는지는 인코텀즈가 정한다. DDP는 도착지까지 매도인이 위험을 진다.' },
+        ];
+      }
+      S.flags.lostKg = 500;
+      const out = [
+        L('pops', S.flags.inc === 'CIF'
+          ? 'CIF라도 위험은 부산에서 배에 실을 때 이미 너에게 넘어왔다. 손해는 네 몫이야. 보험 증권을 꺼내 봐라.'
+          : '배에 실린 순간 위험은 너에게 넘어왔지. 손해는 네 몫이야. 보험은 들어뒀냐?'),
+        L('buddy', '(서류철을 끌고 오며) 버디 손해보험입니다! 증권 좀 볼게요.'),
+      ];
+      if (S.flags.ins === 'A') {
+        const back = Math.round(500 * unit(S) * 1.1);
+        out.push(
+          L('buddy', 'ICC(A)네요! 바닷물 침수도 보상 대상입니다. 다만 청구 절차를 제대로 밟으셔야 해요.'),
+          { t: 'choice', prompt: '젖은 당근, 어떻게 할까?', options: [
+            { label: '📸 바로 사고 통지 + 검정 요청', sub: '사진 찍고 젖은 당근은 그대로 보관',
+              run: S => { pay('보험금 수령 (손해분 송장가액의 110%)', back); mad(-10); card('survey'); card('claim'); },
+              res: [
+                L('gid', '사진을 찍고, 젖은 당근은 버리지 않고 그대로 뒀어요. 검정인이 와서 손해를 확인했어요.'),
+                L('buddy', `검정보고서 확인! 손해분을 송장가액의 110%로 계산해서 ${fmt(back)} 보상해 드립니다.`),
+                L('snow', '보험… 최고다…!'),
+              ],
+              lesson: '사고가 나면 바로 통지하고, 증거(사진·손상품·검정보고서)를 남겨야 보험금을 받을 수 있다.' },
+            { label: '🗑️ 화나서 젖은 당근 다 버리기', sub: '꼴도 보기 싫어!',
+              run: S => { mad(15); card('claim'); },
+              res: [
+                L('snow', '꼴도 보기 싫어! 다 갖다 버려!!'),
+                L('n', '…일주일 뒤 보험금을 청구했다.'),
+                L('buddy', '손해를 확인할 증거가 하나도 없네요… 보상이 어렵습니다.'),
+                L('snow', '으아아아악!!'),
+              ],
+              lesson: '보험을 들어도 증거가 없으면 보상받기 어렵다. 사고가 나면 바로 통지하고, 손상품과 사진, 검정보고서를 남겨야 한다.' },
+          ] });
+      } else if (S.flags.ins === 'C') {
+        out.push(
+          L('buddy', 'ICC(C)네요… (C)는 화재·침몰·좌초·충돌 같은 큰 사고만 보상해요. 바닷물 침수는 대상이 아닙니다.'),
+          L('snow', '보험을 들었는데도?!'),
+          DO(S => { mad(15); card('claim'); }),
+          { t: 'lesson', text: 'ICC(C)는 보상 범위가 가장 좁다. 바닷물 침수까지 대비하려면 (B) 이상, 넓게 대비하려면 (A)가 필요하다. CIF의 기본 보험이 (C)라는 것도 기억하자.' });
+      } else {
+        out.push(
+          L('buddy', '…증권이 없네요? 보험을 안 드셨군요.'),
+          L('snow', '…'),
+          DO(S => { mad(20); card('claim'); }),
+          { t: 'lesson', text: '보험은 사고 전에만 들 수 있다. 몇십 달러 아끼려다 큰 손해를 그대로 떠안을 수 있다.' });
+      }
+      return out;
+    },
+  ] },
+
+  /* ---------- 9장 ---------- */
+  { title: '9장 · 당근 파티와 정산', place: '아지트 · 당근 파티', bg: 'party', steps: [
+    L('n', '드디어 당근이 아지트 창고를 가득 채웠다!'),
+    L('snow', '다들 모여! 오늘은 당근 파티다!!'),
+    L('max', '(하수구 입구에서 빼꼼) 저기… 소문 듣고 왔는데, 제주 당근 우리도 살 수 있어? 듀크도 엄청 먹고 싶대.'),
+    L('snow', '흥, 인간들 품에서 사는 녀석들… 좋아! 돈만 내면 손님이다!'),
+    L('n', S => `펫 마켓과 뉴욕의 반려동물들에게 당근 ${(QTY - S.flags.lostKg).toLocaleString('en-US')}kg을 kg당 $2.60에 모두 팔았다!`),
+    DO(S => pay('당근 판매 수익', Math.round((QTY - S.flags.lostKg) * SALE_PRICE))),
+    L('pops', '허허, 꼬맹아. 제법이었다. 이번 거래 전체를 한 장으로 정리해 주마.'),
+    { t: 'final' },
+  ] },
+];
+
+/* ===== 3. 상태와 진행자 ===== */
+const SAVE_KEY = 'snowball-trade-v1';
+let S;
+function fresh() {
+  return { ch: 0, money: START_MONEY, rage: 20, cards: [], flags: { price: 1.00, inc: 'FOB', ins: 'none', pay: 'TT100', docMissed: 0, lostKg: 0 }, ledger: [], log: [], queue: [], newCards: [], mode: 'idle', boom: false, lastWho: null };
+}
+function save() {
+  try {
+    const { ch, money, rage, cards, flags, ledger, log } = S;
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ ch, money, rage, cards, flags, ledger, log }));
+  } catch (e) { /* 저장 못 해도 게임은 계속 */ }
+}
+function load() {
+  try { const d = JSON.parse(localStorage.getItem(SAVE_KEY)); return d && typeof d.ch === 'number' ? d : null; }
+  catch (e) { return null; }
+}
+function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
+
+function pay(label, amt) {
+  S.money += amt;
+  S.ledger.push({ label, amt });
+  toast(`💰 ${amt > 0 ? '+' : ''}${fmt(amt)}`);
+  hud();
+}
+// 통관 비용: DDP면 농장이 낸다
+function cost(label, amt) {
+  if (S.flags.inc === 'DDP') { toast('💰 농장 부담 (DDP)'); return; }
+  pay(label, amt);
+}
+function mad(n) {
+  S.rage = Math.max(0, Math.min(100, S.rage + n));
+  toast(n > 0 ? `😡 분노 +${n}` : `😌 분노 ${n}`);
+  if (S.rage >= 100) S.boom = true;
+  hud();
+}
+function card(id) {
+  if (S.cards.includes(id)) return;
+  S.cards.push(id);
+  S.newCards.push(id);
+  toast(`🃏 새 카드: ${CARD[id].term}`);
+  hud();
+}
+
+const CH = () => CHAPTERS[S.ch];
+const val = (v) => typeof v === 'function' ? v(S) : v;
+
+function next() {
+  if (S.boom) { S.boom = false; S.queue.unshift(...BOOM); }
+  const item = S.queue.shift();
+  if (item === undefined) return endChapter();
+  if (typeof item === 'function') {
+    const r = item(S);
+    if (r) S.queue.unshift(...(Array.isArray(r) && !(typeof r[0] === 'string' && r.length === 2 && WHO[r[0]]) ? r : [r]));
+    return next();
+  }
+  if (Array.isArray(item)) return showLine(item[0], val(item[1]));
+  switch (item.t) {
+    case 'do': item.fn(S); return next();
+    case 'doc': return showDoc(item);
+    case 'choice': return showChoice(item);
+    case 'lesson': return showLesson(item.text);
+    case 'game': return showGame();
+    case 'final': return showFinal();
+  }
+}
+
+function choose(step, opt) {
+  S.log.push({ ch: S.ch, q: step.prompt, a: opt.label });
+  opt.run && opt.run(S);
+  const items = [...(opt.res || [])];
+  if (S.boom) { S.boom = false; items.push(...BOOM); }
+  if (opt.lesson) items.push({ t: 'lesson', text: opt.lesson });
+  if (opt.retry) items.push({ ...step, options: step.options.filter(o => o !== opt) });
+  S.queue.unshift(...items);
+  closeOverlay();
+  next();
+}
+
+function startChapter(i) {
+  S.ch = i;
+  S.queue = [];
+  S.newCards = [];
+  S.lastWho = null;
+  save();
+  hud();
+  const ch = CH();
+  $('#stage').className = 'bg-' + val(ch.bg);
+  $('#place').textContent = '📍 ' + val(ch.place);
+  showLine('n', '');
+  openOverlay(`
+    <div class="card" style="text-align:center">
+      <p class="muted">${i + 1} / ${CHAPTERS.length}</p>
+      <h2>${ch.title}</h2>
+      <p class="muted">📍 ${val(ch.place)}</p>
+      <div class="row" style="justify-content:center"><button class="btn" id="go">시작 ▶</button></div>
+    </div>`);
+  $('#go').onclick = () => { closeOverlay(); S.queue = [...ch.steps]; next(); };
+}
+
+function endChapter() {
+  if (S.ch >= CHAPTERS.length - 1) return;
+  const got = S.cards.length;
+  openOverlay(`
+    <div class="card" style="text-align:center">
+      <h2>🎉 ${CH().title} 클리어!</h2>
+      <p>💰 자금 <b>${fmt(S.money)}</b> · 😡 분노 <b>${S.rage}</b> · 🃏 카드 <b>${got}/${CARDS.length}</b></p>
+      <p class="muted">진행 상황이 저장됐어요.</p>
+      <div class="row" style="justify-content:center"><button class="btn" id="go">다음 장으로 ▶</button></div>
+    </div>`);
+  $('#go').onclick = () => { closeOverlay(); startChapter(S.ch + 1); };
+}
+
+/* ===== 4. 화면 ===== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function hud() {
+  $('#money').textContent = fmt(S.money);
+  $('#rage').style.width = S.rage + '%';
+  $('#cardCount').textContent = S.cards.length;
+  $('#dots').innerHTML = CHAPTERS.map((c, i) => `<span class="${i < S.ch ? 'done' : i === S.ch ? 'now' : ''}" title="${esc(c.title)}"></span>`).join('');
+}
+
+function showLine(who, text) {
+  S.mode = 'line';
+  const w = WHO[who] || WHO.n;
+  const face = $('#face'), dlg = $('#dialog');
+  if (who === 'n') face.classList.add('hide');
+  else {
+    face.classList.remove('hide');
+    if (S.lastWho !== who) { face.textContent = w.face; face.classList.remove('pop'); void face.offsetWidth; face.classList.add('pop'); }
+    if (who === 'snow' && (S.rage >= 70 || /!!|으아|끄아/.test(text))) { face.classList.remove('shake'); void face.offsetWidth; face.classList.add('shake'); }
+  }
+  S.lastWho = who;
+  dlg.classList.toggle('narr', who === 'n');
+  $('#name').textContent = w.name;
+  $('#name').style.background = w.color;
+  $('#text').textContent = text;
+}
+
+function openOverlay(html) { S.mode = 'overlay'; const o = $('#overlay'); o.innerHTML = html; o.hidden = false; const b = o.querySelector('button'); b && b.focus({ preventScroll: true }); }
+function closeOverlay() { $('#overlay').hidden = true; $('#overlay').innerHTML = ''; S.mode = 'line'; }
+
+function showDoc(item) {
+  openOverlay(`<div class="card"><h2>${item.title}</h2>${val(item.html)}
+    <div class="row"><button class="btn" id="ok">확인 ▶</button></div></div>`);
+  $('#ok').onclick = () => { closeOverlay(); next(); };
+}
+
+function showChoice(step) {
+  const lastSpeaker = S.lastWho && S.lastWho !== 'n' ? WHO[S.lastWho] : null;
+  openOverlay(`<div class="card">
+    ${lastSpeaker ? `<div class="who"><span class="f">${lastSpeaker.face}</span>${lastSpeaker.name}</div>` : ''}
+    <h2>${step.prompt}</h2>
+    ${step.options.map((o, i) => `<button class="opt" data-i="${i}"><b>${o.label}</b>${o.sub ? `<small>${o.sub}</small>` : ''}</button>`).join('')}
+  </div>`);
+  $('#overlay').querySelectorAll('.opt').forEach(b => b.onclick = () => choose(step, step.options[+b.dataset.i]));
+}
+
+function cardHtml(id) { return `<div class="tcard"><b>🃏 ${CARD[id].term}</b>${CARD[id].desc}</div>`; }
+
+function showLesson(text) {
+  const nc = S.newCards.splice(0);
+  openOverlay(`<div class="card">
+    <div class="who"><span class="f">🐕</span>포피 할아버지의 한 줄</div>
+    <div class="lesson">${text}</div>
+    ${nc.length ? `<h3>새로 얻은 카드</h3><div class="newcards">${nc.map(cardHtml).join('')}</div>` : ''}
+    <div class="row"><button class="btn" id="ok">계속 ▶</button></div></div>`);
+  $('#ok').onclick = () => { closeOverlay(); next(); };
+}
+
+function showGame() {
+  const lc = S.flags.pay === 'LC';
+  const price = `USD ${unit(S).toFixed(2)}/kg, ${INC_LABEL[S.flags.inc]}`;
+  const rows = [
+    ['판매자', 'Halla Kkangchong Farm, Jeju, Korea', null],
+    ['구매자 (수하인)', 'Flushed Trading Co., New York', 'Flush Trading Co., New York'],
+    ['품명', 'Fresh Jeju Carrots', null],
+    ['수량', '5,000 kg', '4,500 kg'],
+    ['단가', price, null],
+    ['도착항', 'New York, USA', 'Los Angeles, USA'],
+  ];
+  const total = rows.filter(r => r[2]).length;
+  let found = 0;
+  openOverlay(`<div class="card">
+    <h2>🔍 ${lc ? '클로이의 서류 심사 · 신용장 vs 상업송장' : '기젯의 서류 대조 · 계약서 vs 상업송장'}</h2>
+    <p>상업송장에서 ${lc ? '신용장' : '계약서'}과 <b>다른 칸</b>을 눌러 찾아라! 틀린 칸은 <b>${total}개</b>. 맞는 칸을 누르면 스노우볼이 화낸다.</p>
+    <div class="cmp">${rows.map((r, i) => `<div class="item"><div class="lab">${r[0]}</div><div class="base">${esc(r[1])}</div><button data-i="${i}">${esc(r[2] || r[1])}</button></div>`).join('')}</div>
+    <p class="score" id="score">찾은 곳: 0 / ${total}</p>
+    <div class="row"><button class="btn" id="done">심사 끝내기 ▶</button></div></div>`);
+  $('#overlay').querySelectorAll('.cmp button').forEach(b => b.onclick = () => {
+    const r = rows[+b.dataset.i];
+    if (b.classList.contains('found')) return;
+    if (r[2]) {
+      b.classList.add('found'); found++;
+      toast('🔍 찾았다!');
+      $('#score').textContent = `찾은 곳: ${found} / ${total}` + (found === total ? ' · 완벽해요!' : '');
+    } else {
+      b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope', 'shake');
+      toast('🐰 “그건 맞잖아!”');
+      mad(5);
+    }
+  });
+  $('#done').onclick = () => {
+    S.flags.docMissed = total - found;
+    card('ci');
+    if (lc) card('discrepancy');
+    closeOverlay();
+    next();
+  };
+}
+
+function showFinal() {
+  const profit = S.money - START_MONEY;
+  const [g, gname] = profit >= 5000 ? ['S', '전설의 무역왕'] : profit >= 3500 ? ['A', '믿음직한 대표'] : profit >= 2000 ? ['B', '성장하는 무역상'] : ['C', '수업료를 많이 낸 대표'];
+  const pick = ch => S.log.filter(l => l.ch === ch).map(l => l.a.replace(/^[^\p{L}\p{N}$]+/u, '')).join(' → ') || '-';
+  const flow = [
+    ['문의·거래처 고르기', 0], ['오퍼와 승낙 (계약 성립)', 1], ['인코텀즈·적하보험', 2], ['결제 조건 (T/T·L/C)', 3],
+    ['선적서류 대조', 4], ['B/L로 화물 찾기', 5], ['수입통관 (HS·검역·FTA)', 6], ['사고와 보험 클레임', 7],
+  ];
+  const docNote = S.flags.docMissed ? `틀린 곳 ${S.flags.docMissed}개 놓침` : '틀린 곳 모두 찾음';
+  S.mode = 'overlay';
+  clearSave();
+  openOverlay(`<div class="card">
+    <h2>🥕 거래 완료! 최종 정산</h2>
+    <div class="grade">${g}</div>
+    <p style="text-align:center"><b>${gname}</b><br><span class="muted">순이익 ${fmt(profit)} · 남은 분노 ${S.rage} · 카드 ${S.cards.length}/${CARDS.length}</span></p>
+
+    <h3>📒 장부</h3>
+    <table class="doc">
+      <tr><td>시작 자금</td><td class="num">${fmt(START_MONEY)}</td></tr>
+      ${S.ledger.map(l => `<tr><td>${esc(l.label)}</td><td class="num ${l.amt >= 0 ? 'plus' : 'minus'}">${l.amt > 0 ? '+' : ''}${fmt(l.amt)}</td></tr>`).join('')}
+      <tr><th>최종 자금</th><th class="num">${fmt(S.money)}</th></tr>
+    </table>
+
+    <h3>🐕 포피 할아버지의 무역 흐름 한 장 정리</h3>
+    <ol class="flow">${flow.map(([t, ch]) => `<li>${t}<span>내 선택: ${esc(ch === 4 ? docNote : pick(ch))}</span></li>`).join('')}
+      <li>판매와 정산<span>당근 ${(QTY - S.flags.lostKg).toLocaleString('en-US')}kg 판매</span></li></ol>
+    <p class="muted">다른 선택을 하면 비용과 사건이 달라져요. 다시 해서 S등급과 카드 ${CARDS.length}장을 모아보세요!</p>
+    <p class="muted">※ 개인 학습용 팬 게임입니다. 캐릭터 ‘마이펫의 이중생활’의 저작권은 Illumination·Universal에 있습니다. 금액·세율·운임은 게임용 가상 수치로, 실제 거래 조건과 다릅니다.</p>
+    <div class="row"><button class="btn ghost" id="dex">🃏 카드 도감</button><button class="btn" id="again">처음부터 다시 ↺</button></div>
+  </div>`);
+  $('#dex').onclick = showDex;
+  $('#again').onclick = () => { S = fresh(); hud(); startChapter(0); };
+}
+
+function showDex() {
+  const m = $('#modal');
+  m.innerHTML = `<div class="card"><h2>🃏 무역 용어 카드 도감 (${S.cards.length}/${CARDS.length})</h2>
+    <div class="newcards">${CARDS.map(([id]) => S.cards.includes(id) ? cardHtml(id) : `<div class="tcard locked"><b>🔒 ???</b>아직 못 얻은 카드</div>`).join('')}</div>
+    <div class="row"><button class="btn" id="closeDex">닫기</button></div></div>`;
+  m.hidden = false;
+  $('#closeDex').onclick = () => { m.hidden = true; m.innerHTML = ''; };
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  const box = $('#toasts');
+  box.appendChild(t);
+  while (box.children.length > 3) box.firstChild.remove();
+  setTimeout(() => t.remove(), 2900);
+}
+
+function showTitle() {
+  const saved = load();
+  S = fresh();
+  hud();
+  $('#stage').className = 'bg-sewer';
+  $('#place').textContent = '📍 뉴욕 지하';
+  showLine('n', '');
+  openOverlay(`<div class="card title">
+    <div class="big">🐰🥕</div>
+    <h1>캡틴 스노우볼의 무역회사</h1>
+    <p>버려진 동물들의 당근 창고가 텅 비었다! 스노우볼과 함께 제주 당근 5톤을 뉴욕 하수구까지 들여와 보자.</p>
+    <p class="muted">문의 → 오퍼 → 인코텀즈 → 결제 → 서류 → B/L → 통관 → 보험까지, 9장짜리 수입 한 건. 고르기만 하면 진행돼요. 한 판에 15분쯤 걸려요.</p>
+    <p class="muted">💰 자금을 지키고 😡 분노 게이지를 조심하세요. 100이 되면 스노우볼이 대폭발해요!</p>
+    <div class="row">
+      ${saved && saved.ch > 0 ? `<button class="btn ghost" id="cont">이어하기 (${saved.ch + 1}장)</button>` : ''}
+      <button class="btn" id="start">새로 시작 ▶</button>
+    </div>
+    <p class="muted" style="margin-top:14px">개인 학습용 팬 게임 · 캐릭터 저작권 Illumination·Universal · 금액은 가상 수치</p>
+  </div>`);
+  $('#start').onclick = () => { clearSave(); S = fresh(); startChapter(0); };
+  const c = $('#cont');
+  if (c) c.onclick = () => { Object.assign(S, saved); startChapter(saved.ch); };
+}
+
+$('#stage').addEventListener('click', e => { if (S.mode === 'line' && !e.target.closest('.overlay')) next(); });
+document.addEventListener('keydown', e => {
+  if ((e.key === ' ' || e.key === 'Enter') && S.mode === 'line' && $('#modal').hidden) { e.preventDefault(); next(); }
+});
+$('#btnCards').onclick = showDex;
+$('#btnReset').onclick = () => { if (confirm('처음부터 다시 할까요? 저장된 진행 상황이 지워져요.')) { clearSave(); showTitle(); } };
+
+showTitle();
+</script>
+</body>
+</html>
