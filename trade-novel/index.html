@@ -66,10 +66,16 @@ header.top h1 small { font-weight: 400; color: var(--ink-2); font-size: 12px; ma
 @media (max-width: 600px) { header.top h1 small, header.top .lbl { display: none; } header.top { padding: 8px 12px; } }
 
 .layout {
-  display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px;
-  max-width: 1200px; margin: 0 auto; padding: 14px 16px 20px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px 16px;
+  grid-template-areas: "stage sit" "stage side"; grid-template-rows: auto 1fr; align-items: start;
+  max-width: 1240px; margin: 0 auto; padding: 14px 16px 20px;
 }
-@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); padding: 10px 12px 16px; } }
+.stage { grid-area: stage; }
+.sit { grid-area: sit; }
+aside.side { grid-area: side; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage" "sit"; grid-template-rows: auto; padding: 10px 12px 16px; }
+}
 
 /* ---- 게임 화면 ---------------------------------------------------- */
 .stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -216,6 +222,19 @@ aside.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
 .card h3 { font-size: 13px; margin: 0 0 8px; color: var(--ink-2); font-weight: 600; letter-spacing: .02em; }
 .side-close { display: none; }
+/* 지금 상황: 대화하면서 계속 볼 수 있게 늘 펼쳐 둔다 */
+.sit { display: flex; flex-direction: column; gap: 6px; }
+.sit h3 { margin: 0; display: flex; align-items: center; gap: 6px; }
+.sit .situation { margin: 0; font-size: 13px; line-height: 1.55; max-height: 44vh; overflow: auto; }
+.sit .goal { margin: 0; }
+@media (max-width: 900px) { .sit .situation { max-height: none; } }
+details.card > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary::after { content: "▾"; color: var(--ink-2); font-size: 12px; }
+details.card:not([open]) > summary::after { content: "▸"; }
+details.card > summary h3 { margin: 0; }
+details.card[open] > summary { margin-bottom: 8px; }
+.side-block + .side-block { margin-top: 10px; }
 @media (max-width: 900px) {
   aside.side {
     display: none; position: fixed; inset: 0; z-index: 20; overflow-y: auto;
@@ -320,7 +339,7 @@ aside.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
       <div class="hud">
         <div class="title"><span class="badge 본편" id="sceneType">본편</span><span id="sceneTitle">-</span></div>
         <div class="tools">
-          <button id="btnSituation">상황</button>
+          <button id="btnSituation" class="only-mobile">상황</button>
           <button id="btnLog">대화 기록</button>
           <button id="btnSide" class="only-mobile">현황</button>
         </div>
@@ -356,24 +375,32 @@ aside.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
     <div class="status" id="status"></div>
   </section>
 
+  <section class="sit card" id="sitCard" aria-label="지금 상황">
+    <h3>📋 지금 상황</h3>
+    <div class="situation" id="sitText"></div>
+    <p class="goal" id="sitGoal"></p>
+  </section>
+
   <aside class="side" id="side" aria-label="현황">
     <button class="btn small side-close" id="btnSideClose">닫기 ✕</button>
     <div class="card">
-      <h3>진행 단계</h3>
-      <ol class="stages" id="stages"></ol>
+      <div class="side-block">
+        <h3>진행 단계</h3>
+        <ol class="stages" id="stages"></ol>
+      </div>
+      <div class="side-block">
+        <h3>상태</h3>
+        <div id="meters"></div>
+      </div>
     </div>
-    <div class="card">
-      <h3>상태</h3>
-      <div id="meters"></div>
-    </div>
-    <div class="card">
-      <h3>사고 기록</h3>
+    <details class="card" id="incCard">
+      <summary><h3>사고 기록 <span id="incCount"></span></h3></summary>
       <ul class="inc-list" id="incidents"></ul>
-    </div>
-    <div class="card">
-      <h3>용어집 <span id="glossCount"></span></h3>
+    </details>
+    <details class="card" id="glossCard">
+      <summary><h3>용어집 <span id="glossCount"></span></h3></summary>
       <ul class="gloss" id="gloss"></ul>
-    </div>
+    </details>
   </aside>
 </main>
 
@@ -894,13 +921,12 @@ Dana가 원하는 조건: CIF Los Angeles`,
 생산 들어가기 전, 한 대리가 제품 한 봉지를 네 앞에 내려놓는다.
 뒷면에는 영문 스티커 초안이 붙어 있다.
 
-┌──────────────────────────────────────────┐
+[영문 스티커 초안]
   SEASONED LAVER SNACK
-  Ingredients: Laver, Sesame Oil, Soybean Oil,
-  Wheat Flour, Salt
+  Ingredients: Laver, Sesame Oil,
+  Soybean Oil, Wheat Flour, Salt
   Net Wt. 35g (1.23 oz)
-  Product of Korea
-└──────────────────────────────────────────┘`,
+  Product of Korea`,
   opening: L('question', '(봉지를 네 앞으로 밀며) PO 들어왔다. 근데 미국 가는 식품이야. 배 띄우기 전에, 미국 쪽에서 걸릴 수 있는 게 뭐 있어? 하나씩 말해봐.'),
   facts: [
     'FDA 식품시설 등록(FFR): 미국에 수출하는 식품을 만드는 시설은 FDA에 직접 등록한다. 등록비는 없다. 짝수 해(10~12월)마다 갱신하고, 외국 시설은 미국 대리인(US Agent)을 지정해야 한다.',
@@ -1238,20 +1264,29 @@ recovery({
 `한 대리가 선적서류 초안 세 장을 내민다. 오늘이 SI 마감이다.
 
 [상업송장 C/I]
-  품명: SEASONED LAVER SNACK 35G X 30  │ 수량: 1,000 CTNS
-  순중량: 1,050 KGS │ 총중량: 2,400 KGS │ 수하인: HARBOR LANE FOODS INC.
+  품명    SEASONED LAVER SNACK 35G X 30
+  수량    1,000 CTNS
+  순중량  1,050 KGS
+  총중량  2,400 KGS
+  수하인  HARBOR LANE FOODS INC.
 
 [포장명세서 P/L]
-  품명: SEASONED LAVER SNACK 35G X 30  │ 수량: 1,000 CTNS
-  순중량: 1,050 KGS │ 총중량: 2,640 KGS │ 수하인: HARBOR LANE FOODS INC.
+  품명    SEASONED LAVER SNACK 35G X 30
+  수량    1,000 CTNS
+  순중량  1,050 KGS
+  총중량  2,640 KGS
+  수하인  HARBOR LANE FOODS INC.
 
 [B/L 초안 (SI)]
-  품명: SEASONED LAVER SNACK │ 수량: 1,000 CTNS
-  총중량: 2,400 KGS │ 수하인: HARBOR LANE FOODS INC.
+  품명    SEASONED LAVER SNACK
+  수량    1,000 CTNS
+  총중량  2,400 KGS
+  수하인  HARBOR LANE FOODS INC.
 ` + (st.flags.paymentTerm === '신용장' ?
 `
 [신용장 사본 · 45A 물품명세]
-  ROASTED SEAWEED SNACK 35G X 30, 1,000 CARTONS, CIF LOS ANGELES` : ''),
+  ROASTED SEAWEED SNACK 35G X 30
+  1,000 CARTONS, CIF LOS ANGELES` : ''),
   opening: L('normal', '(서류 세 장을 내밀며) C/I, P/L, SI 초안이야. 오늘 SI 마감이고. 볼 거 있으면 보고, 없으면 오 과장한테 넘겨.'),
   facts: [
     'C/I(상업송장): 무엇을 얼마에 팔았는지 보여주는 서류. 수입국 세관이 관세 계산에 쓴다.',
@@ -2183,6 +2218,9 @@ function renderSide() {
   $('incidents').innerHTML = st.incidents.length
     ? st.incidents.map(i => `<li class="${i.resolved ? 'ok' : 'open'}">${i.resolved ? '✓ 수습' : '● 진행 중'} · ${esc(i.title)}</li>`).join('')
     : '<li class="empty">아직 없음</li>';
+  const openInc = st.incidents.filter(i => !i.resolved).length;
+  $('incCount').textContent = st.incidents.length ? `(${st.incidents.length}${openInc ? ` · 진행 중 ${openInc}` : ''})` : '';
+  if (openInc) $('incCard').open = true;
   $('glossCount').textContent = st.learned.length ? `(${st.learned.length})` : '';
   $('gloss').innerHTML = st.learned.length
     ? st.learned.map(l => `<li><details><summary>${esc(l.term)}</summary><p>${esc(l.desc)}</p></details></li>`).join('')
@@ -2401,6 +2439,9 @@ function renderHead() {
   $('sceneType').textContent = sc.type;
   $('sceneTitle').textContent = sc.title;
   setBackground();
+  $('sitText').textContent = G.cur.situation || '';
+  $('sitGoal').textContent = '학습 목표 · ' + sc.goal;
+  $('sitText').scrollTop = 0;
 }
 
 // ---- 팝업 ------------------------------------------------------------
@@ -2442,14 +2483,6 @@ function showBacklog() {
   for (const line of G.cur.log) if (line.t !== 'result') box.appendChild(lineNode(line));
   if (!G.cur.log.length) box.innerHTML = '<p class="empty">아직 대화가 없어요.</p>';
   requestAnimationFrame(() => { $('sheet').scrollTop = $('sheet').scrollHeight; });
-}
-function showSituation() {
-  if (!G.cur || !G.cur.sceneId) return;
-  const sc = sceneById(G.cur.sceneId);
-  openSheet(`<span class="badge ${sc.type}">${sc.type}</span><h2>${esc(sc.title)}</h2>
-    <div class="situation">${esc(G.cur.situation)}</div>
-    <p class="goal">학습 목표 · ${esc(sc.goal)}</p>
-    <div class="actions"><button class="btn primary" data-act="close">닫기</button></div>`, '[data-act="close"]');
 }
 
 // ---- 흐름 -------------------------------------------------------------
@@ -2600,6 +2633,8 @@ function showReview() {
   applyBg('office', 'evening');
   setNameplate(null);
   $('line').textContent = '첫 수출 한 건이 끝났다. 위의 "복기" 버튼으로 다시 볼 수 있다.';
+  $('sitText').textContent = '첫 수출 한 건이 끝났습니다. 복기 화면에서 지나온 장면과 각 결말이 부른 장면을 확인해 보세요.';
+  $('sitGoal').textContent = '';
   $('more').hidden = true;
   showEcho('');
   setInputEnabled(false);
@@ -2646,7 +2681,7 @@ function bind() {
   $('btnWrap').addEventListener('click', wrapScene);
   $('btnReset').addEventListener('click', resetGame);
   $('btnLog').addEventListener('click', () => (G.cur && G.cur.phase === 'review' ? showReview() : showBacklog()));
-  $('btnSituation').addEventListener('click', () => (G.cur && G.cur.phase === 'review' ? showReview() : showSituation()));
+  $('btnSituation').addEventListener('click', () => (G.cur && G.cur.phase === 'review' ? showReview() : $('sitCard').scrollIntoView({ behavior: 'smooth', block: 'start' })));
   $('btnSide').addEventListener('click', () => document.body.classList.add('show-side'));
   $('btnSideClose').addEventListener('click', () => document.body.classList.remove('show-side'));
   window.addEventListener('resize', positionEcho);
