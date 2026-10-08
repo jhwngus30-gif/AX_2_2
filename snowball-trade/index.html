@@ -61,7 +61,10 @@ body {
 #stage { position: relative; flex: 1; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; transition: background .6s; }
 #place { position: absolute; top: 10px; left: 12px; color: rgba(255,255,255,.85); font-size: 13px; background: rgba(0,0,0,.3); padding: 4px 10px; border-radius: 99px; }
 #portrait { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 26px; min-height: 0; }
-#portrait .face { font-size: clamp(84px, 18vh, 150px); line-height: 1; filter: drop-shadow(0 10px 14px rgba(0,0,0,.4)); }
+#portrait .face { height: clamp(150px, 34vh, 290px); aspect-ratio: 200 / 240; filter: drop-shadow(0 10px 14px rgba(0,0,0,.4)); }
+#portrait .face svg, #portrait .face img { width: 100%; height: 100%; object-fit: contain; object-position: bottom; display: block; }
+.card .who .f { width: 40px; height: 48px; flex: none; }
+.card .who .f svg, .card .who .f img { width: 100%; height: 100%; object-fit: contain; }
 #portrait .face.hide { visibility: hidden; }
 .pop { animation: pop .35s ease; }
 @keyframes pop { from { transform: scale(.82) translateY(14px); opacity: .2; } to { transform: none; opacity: 1; } }
@@ -101,7 +104,6 @@ body {
 .card h3 { margin: 18px 0 6px; font-size: 16px; }
 .card p { line-height: 1.6; margin: 8px 0; }
 .card .who { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--muted); font-size: 14px; }
-.card .who .f { font-size: 28px; }
 .muted { color: var(--muted); font-size: 13px; }
 .opt {
   display: block; width: 100%; text-align: left; margin: 10px 0; padding: 12px 14px;
@@ -176,7 +178,7 @@ ol.flow li span { color: var(--muted); font-size: 13px; display: block; }
   <div class="dots" id="dots"></div>
   <main id="stage" class="bg-sewer">
     <span id="place"></span>
-    <div id="portrait"><div class="face hide" id="face">🐰</div></div>
+    <div id="portrait"><div class="face hide" id="face"></div></div>
     <div id="dialog">
       <span class="name" id="name"></span>
       <div class="text" id="text"></div>
@@ -203,6 +205,181 @@ const WHO = {
   rex:    { name: '렉스 · 뉴욕세관',    face: '🐕‍🦺', color: '#44515c' },
   max:    { name: '맥스',              face: '🐶', color: '#3c8dbc' },
 };
+
+/* 캐릭터 그림: img/아이디.png(표정은 img/snow_angry.png, img/snow_happy.png)가 있으면 그 그림을,
+   없으면 아래 코드로 그린 SVG를 쓴다. */
+const O = 'stroke="#2f2d38" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+const eye = (x, y, r, iris) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" ${O}/><circle cx="${x}" cy="${y + 1}" r="${r * 0.66}" fill="${iris}"/><circle cx="${x}" cy="${y + 1}" r="${r * 0.36}" fill="#17161d"/><circle cx="${x - r * 0.25}" cy="${y - r * 0.25}" r="${r * 0.2}" fill="#fff"/>`;
+const bead = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#1d1b22"/><circle cx="${x - r * 0.3}" cy="${y - r * 0.35}" r="${r * 0.32}" fill="#fff"/>`;
+const svg = body => `<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+const ring = (cx, cy, R, r, n, fill, start = 0) => Array.from({ length: n }, (_, i) => {
+  const a = start + i * 2 * Math.PI / n;
+  return `<circle cx="${(cx + R * Math.cos(a)).toFixed(1)}" cy="${(cy + R * Math.sin(a)).toFixed(1)}" r="${r}" fill="${fill}" ${O}/>`;
+}).join('');
+
+const SPRITES = {
+  // 스노우볼: 복슬복슬한 흰 토끼, 쫑긋한 귀, 파란 큰 눈, 앞니 두 개
+  snow: m => {
+    const W = '#fdfdff';
+    const eyes = m === 'happy'
+      ? `<path d="M64 136 q14 -16 28 0 M108 136 q14 -16 28 0" fill="none" ${O} stroke-width="6"/>`
+      : eye(78, 132, 19, '#6fb8ff') + eye(122, 132, 19, '#6fb8ff');
+    const brows = m === 'angry'
+      ? `<path d="M56 102 L95 117 M144 102 L105 117" fill="none" ${O} stroke-width="8"/>`
+      : `<path d="M64 106 q12 -7 24 -2 M112 104 q12 -5 24 2" fill="none" ${O} stroke-width="4"/>`;
+    const mouth = m === 'angry'
+      ? `<path d="M83 168 q17 -7 34 0 q-3 22 -17 22 q-14 0 -17 -22z" fill="#8a2a3b" ${O}/><path d="M93 167 h14 v10 h-14z M100 167 v10" fill="#fff" ${O} stroke-width="2"/>`
+      : `<path d="M100 159 v6 M100 165 q-7 7 -14 1 M100 165 q7 7 14 1" fill="none" ${O}/><path d="M94 168 h12 v10 q0 2 -2 2 h-8 q-2 0 -2 -2z M100 168 v12" fill="#fff" ${O} stroke-width="2"/>`;
+    const vein = m === 'angry' ? `<g stroke="#e2344b" stroke-width="5" stroke-linecap="round"><path d="M142 84 l9 -9"/><path d="M147 92 l12 -2"/><path d="M136 78 l2 -12"/></g>` : '';
+    return svg(`
+      <ellipse cx="100" cy="214" rx="48" ry="26" fill="#f1f2f6" ${O}/>
+      <g transform="rotate(-11 76 104)"><ellipse cx="76" cy="58" rx="18" ry="52" fill="${W}" ${O}/><ellipse cx="76" cy="62" rx="8" ry="38" fill="#f7b5c6"/></g>
+      <g transform="rotate(11 124 104)"><ellipse cx="124" cy="58" rx="18" ry="52" fill="${W}" ${O}/><ellipse cx="124" cy="62" rx="8" ry="38" fill="#f7b5c6"/></g>
+      ${ring(100, 142, 58, 14, 12, W, 0.26)}
+      <circle cx="100" cy="142" r="60" fill="${W}" ${O}/>
+      <path d="M86 84 q6 10 14 4 q8 6 14 -4" fill="${W}" ${O} stroke-width="2.5"/>
+      <ellipse cx="64" cy="160" rx="10" ry="6" fill="#ffc4d2"/><ellipse cx="136" cy="160" rx="10" ry="6" fill="#ffc4d2"/>
+      ${brows}${eyes}
+      <path d="M92 151 q8 -6 16 0 q-8 9 -16 0z" fill="#f4879f" ${O} stroke-width="2"/>
+      ${mouth}${vein}`);
+  },
+  // 기젯: 흰 포메라니안, 솜사탕 같은 털, 분홍 리본
+  gid: () => svg(`
+    <ellipse cx="100" cy="214" rx="50" ry="26" fill="#fbf8fb" ${O}/>
+    <path d="M58 104 L66 62 L92 92z" fill="#fbf8fb" ${O}/><path d="M142 104 L134 62 L108 92z" fill="#fbf8fb" ${O}/>
+    ${ring(100, 140, 56, 17, 13, '#fbf8fb', 0.1)}
+    <circle cx="100" cy="140" r="58" fill="#fbf8fb" ${O}/>
+    <path d="M128 84 l26 -14 l-2 26z M128 84 l-6 -24 l-20 16z" fill="#ff78b4" ${O}/><circle cx="128" cy="84" r="7" fill="#ff4f9a" ${O}/>
+    ${eye(80, 134, 16, '#3b2618')}${eye(120, 134, 16, '#3b2618')}
+    <path d="M64 120 l-6 -5 M68 116 l-4 -7 M136 120 l6 -5 M132 116 l4 -7" ${O} stroke-width="2.5"/>
+    <ellipse cx="100" cy="154" rx="8" ry="6" fill="#1d1b22"/>
+    <path d="M100 160 v4 M100 164 q-6 6 -11 1 M100 164 q6 6 11 1" fill="none" ${O}/>
+    <path d="M95 168 q5 10 10 0z" fill="#ff8fb0" ${O} stroke-width="2"/>
+    <ellipse cx="68" cy="158" rx="8" ry="5" fill="#ffc9da"/><ellipse cx="132" cy="158" rx="8" ry="5" fill="#ffc9da"/>`),
+  // 포피: 늙은 바셋하운드, 축 처진 긴 귀, 처진 눈꺼풀, 흰 눈썹
+  pops: () => svg(`
+    <ellipse cx="100" cy="216" rx="52" ry="24" fill="#c98b55" ${O}/>
+    <rect x="62" y="70" width="76" height="120" rx="38" fill="#c98b55" ${O}/>
+    <path d="M70 92 q-34 4 -30 66 q2 32 22 34 q14 0 12 -30z" fill="#6f4123" ${O}/>
+    <path d="M130 92 q34 4 30 66 q-2 32 -22 34 q-14 0 -12 -30z" fill="#6f4123" ${O}/>
+    <path d="M92 74 q8 -4 16 0 l-2 70 h-12z" fill="#f1e2c8"/>
+    <ellipse cx="100" cy="168" rx="34" ry="26" fill="#f1e2c8" ${O}/>
+    <circle cx="84" cy="128" r="9" fill="#1d1b22"/><circle cx="116" cy="128" r="9" fill="#1d1b22"/>
+    <path d="M72 128 q12 -12 24 0z M104 128 q12 -12 24 0z" fill="#b57a47" ${O} stroke-width="2.5"/>
+    <path d="M76 140 q8 5 16 0 M108 140 q8 5 16 0" fill="none" ${O} stroke-width="2"/>
+    <path d="M70 112 q8 -8 22 -4 M130 112 q-8 -8 -22 -4" fill="none" stroke="#e9e9ee" stroke-width="7" stroke-linecap="round"/>
+    <ellipse cx="100" cy="158" rx="13" ry="9" fill="#1d1b22"/>
+    <path d="M100 167 v8 M100 175 q-12 10 -22 2 M100 175 q12 10 22 2" fill="none" ${O}/>`),
+  // 타이베리어스: 붉은꼬리매, 날카로운 노란 눈, 갈고리 부리
+  tib: () => svg(`
+    <ellipse cx="100" cy="208" rx="54" ry="34" fill="#f1e5d1" ${O}/>
+    <path d="M70 196 l6 6 M90 206 l6 6 M112 200 l6 6 M128 210 l6 6" ${O} stroke="#8a5a2c"/>
+    <path d="M62 98 L72 64 L88 84 L100 58 L112 84 L128 64 L138 98z" fill="#7b4c22" ${O}/>
+    <ellipse cx="100" cy="128" rx="52" ry="56" fill="#8a5a2c" ${O}/>
+    <ellipse cx="100" cy="150" rx="34" ry="30" fill="#e9d8bd"/>
+    ${eye(78, 124, 13, '#f5c518')}${eye(122, 124, 13, '#f5c518')}
+    <path d="M58 108 L96 118 M142 108 L104 118" fill="none" ${O} stroke-width="7" stroke="#3a2412"/>
+    <path d="M86 138 q14 -8 28 0 l-4 10 h-20z" fill="#f2c14e" ${O}/>
+    <path d="M90 148 q10 30 10 30 q0 0 10 -30z" fill="#55525c" ${O}/>`),
+  // 클로이: 통통한 회색 줄무늬 고양이, 반쯤 감긴 눈
+  chloe: () => svg(`
+    <ellipse cx="100" cy="212" rx="62" ry="30" fill="#9ca3ad" ${O}/>
+    <path d="M44 120 L52 66 L88 92z" fill="#9ca3ad" ${O}/><path d="M156 120 L148 66 L112 92z" fill="#9ca3ad" ${O}/>
+    <path d="M54 108 L58 80 L78 96z M146 108 L142 80 L122 96z" fill="#f2b6c4"/>
+    <ellipse cx="100" cy="140" rx="68" ry="58" fill="#9ca3ad" ${O}/>
+    <path d="M100 86 v18 M86 90 l4 14 M114 90 l-4 14 M36 140 h16 M38 152 l14 -4 M164 140 h-16 M162 152 l-14 -4" fill="none" ${O} stroke="#5e6570" stroke-width="4"/>
+    <ellipse cx="100" cy="166" rx="30" ry="22" fill="#eef0f3"/>
+    <ellipse cx="76" cy="134" rx="13" ry="11" fill="#9be07a" ${O}/><ellipse cx="124" cy="134" rx="13" ry="11" fill="#9be07a" ${O}/>
+    <ellipse cx="76" cy="136" rx="3" ry="8" fill="#1d1b22"/><ellipse cx="124" cy="136" rx="3" ry="8" fill="#1d1b22"/>
+    <path d="M62 132 q14 -10 28 0 v-10 h-28z M110 132 q14 -10 28 0 v-10 h-28z" fill="#9ca3ad"/>
+    <path d="M62 132 q14 -6 28 0 M110 132 q14 -6 28 0" fill="none" ${O}/>
+    <path d="M94 156 h12 l-6 7z" fill="#f48aa6" ${O} stroke-width="2"/>
+    <path d="M100 163 v4 M100 167 q-6 5 -11 0 M100 167 q6 5 11 0" fill="none" ${O}/>
+    <path d="M62 162 l-26 -4 M62 170 l-26 4 M138 162 l26 -4 M138 170 l26 4" ${O} stroke-width="2"/>`),
+  // 노먼: 기니피그, 주황·흰 털, 늘 길 잃은 표정
+  norman: () => svg(`
+    <ellipse cx="100" cy="166" rx="76" ry="62" fill="#d98d45" ${O}/>
+    <path d="M78 106 q22 -10 44 0 l8 120 h-60z" fill="#fff6ea"/>
+    <ellipse cx="100" cy="166" rx="76" ry="62" fill="none" ${O}/>
+    <ellipse cx="52" cy="112" rx="13" ry="10" fill="#f1a9a0" ${O}/><ellipse cx="148" cy="112" rx="13" ry="10" fill="#f1a9a0" ${O}/>
+    ${bead(74, 146, 8)}${bead(126, 146, 8)}
+    <path d="M94 164 q6 -5 12 0 q-6 6 -12 0z" fill="#f4879f" ${O} stroke-width="2"/>
+    <path d="M100 168 v5 M100 173 q-5 4 -9 0 M100 173 q5 4 9 0" fill="none" ${O} stroke-width="2.5"/>
+    <path d="M86 166 l-30 -4 M86 172 l-30 4 M114 166 l30 -4 M114 172 l30 4" ${O} stroke-width="1.8"/>
+    <path d="M154 92 q8 12 0 18 q-8 -6 0 -18z" fill="#8fd0ff" ${O} stroke-width="2"/>`),
+  // 버디: 닥스훈트, 긴 주둥이, 보험사 넥타이
+  buddy: () => svg(`
+    <path d="M70 196 h60 l10 44 h-80z" fill="#f4f6fb" ${O}/><path d="M100 198 l-8 10 l8 30 l8 -30z" fill="#2f6fb3" ${O} stroke-width="2"/>
+    <path d="M66 96 q-30 10 -24 70 q4 20 18 16 q10 -4 10 -30z" fill="#6e3418" ${O}/>
+    <path d="M134 96 q30 10 24 70 q-4 20 -18 16 q-10 -4 -10 -30z" fill="#6e3418" ${O}/>
+    <ellipse cx="100" cy="122" rx="40" ry="44" fill="#a4552a" ${O}/>
+    <ellipse cx="100" cy="168" rx="24" ry="30" fill="#a4552a" ${O}/>
+    ${eye(84, 118, 11, '#5a2e12')}${eye(116, 118, 11, '#5a2e12')}
+    <path d="M74 104 q8 -5 16 -1 M126 104 q-8 -5 -16 -1" fill="none" ${O}/>
+    <ellipse cx="100" cy="192" rx="10" ry="7" fill="#1d1b22"/>
+    <path d="M100 172 q-6 6 -10 2 M100 172 q6 6 10 2" fill="none" ${O} stroke-width="2.5"/>`),
+  // 한라: 제주 조랑말, 짙은 갈기, 하얀 콧등, 감귤 하나
+  halla: () => svg(`
+    <path d="M70 72 L76 38 L92 64z M130 72 L124 38 L108 64z" fill="#8b5a35" ${O}/>
+    <ellipse cx="100" cy="130" rx="44" ry="72" fill="#8b5a35" ${O}/>
+    <path d="M78 62 q22 -18 44 0 q-6 30 -22 26 q-16 4 -22 -26z" fill="#3a2416" ${O}/>
+    <path d="M94 96 q6 -4 12 0 l4 70 h-20z" fill="#f4ead9"/>
+    <ellipse cx="100" cy="184" rx="34" ry="22" fill="#c49a72" ${O}/>
+    <ellipse cx="88" cy="186" rx="5" ry="7" fill="#3a2416"/><ellipse cx="112" cy="186" rx="5" ry="7" fill="#3a2416"/>
+    ${eye(76, 120, 12, '#4a2c18')}${eye(124, 120, 12, '#4a2c18')}
+    <path d="M64 110 l-5 -5 M136 110 l5 -5" ${O} stroke-width="2.5"/>
+    <path d="M90 198 q10 8 20 0" fill="none" ${O} stroke-width="2.5"/>
+    <circle cx="160" cy="210" r="20" fill="#ff9a1f" ${O}/><path d="M160 190 q8 -10 16 -6 q-6 8 -16 6z" fill="#3aa35b" ${O} stroke-width="2"/>`),
+  // 렉스: 셰퍼드 세관 탐지견, 검은 안장 무늬, 세관 모자
+  rex: () => svg(`
+    <path d="M60 110 L64 40 L96 86z M140 110 L136 40 L104 86z" fill="#2a2420" ${O}/>
+    <path d="M68 96 L70 58 L88 86z M132 96 L130 58 L112 86z" fill="#c98d4f"/>
+    <ellipse cx="100" cy="134" rx="50" ry="54" fill="#c98d4f" ${O}/>
+    <path d="M70 100 q30 -26 60 0 l-12 36 h-36z" fill="#2a2420"/>
+    <path d="M86 140 h28 l8 40 q-22 14 -44 0z" fill="#e3b47c" ${O}/>
+    <path d="M90 140 q10 -10 20 0 v18 h-20z" fill="#2a2420"/>
+    ${eye(78, 128, 12, '#5a3a16')}${eye(122, 128, 12, '#5a3a16')}
+    <path d="M64 114 L92 120 M136 114 L108 120" fill="none" ${O} stroke-width="5"/>
+    <ellipse cx="100" cy="164" rx="11" ry="8" fill="#1d1b22"/>
+    <path d="M100 172 v6 M100 178 q-8 6 -14 1 M100 178 q8 6 14 1" fill="none" ${O}/>
+    <path d="M58 84 q42 -34 84 0 l-4 10 h-76z" fill="#23365a" ${O}/><rect x="56" y="88" width="88" height="10" rx="4" fill="#16233d" ${O} stroke-width="2"/>
+    <path d="M100 64 l6 6 l-6 8 l-6 -8z" fill="#f2c14e" ${O} stroke-width="2"/>
+    <path d="M60 200 h80 l8 40 h-96z" fill="#23365a" ${O}/>`),
+  // 맥스: 잭 러셀 테리어, 흰 얼굴에 갈색 무늬와 접힌 귀
+  max: () => svg(`
+    <ellipse cx="100" cy="214" rx="46" ry="26" fill="#fafafa" ${O}/>
+    <path d="M56 100 L62 64 L94 84z M144 100 L138 64 L106 84z" fill="#a8662f" ${O}/>
+    <circle cx="100" cy="134" r="54" fill="#fafafa" ${O}/>
+    <path d="M58 104 q20 -30 44 -24 q-6 30 -10 56 q-26 6 -34 -32z" fill="#a8662f"/>
+    <path d="M142 104 q-8 -18 -26 -22 q2 18 8 26z" fill="#a8662f"/>
+    <circle cx="100" cy="134" r="54" fill="none" ${O}/>
+    ${eye(80, 126, 13, '#4a2c18')}${eye(120, 126, 13, '#4a2c18')}
+    <ellipse cx="100" cy="152" rx="10" ry="7" fill="#1d1b22"/>
+    <path d="M100 159 v5 M100 164 q-8 7 -14 1 M100 164 q8 7 14 1" fill="none" ${O}/>
+    <path d="M93 168 q7 14 14 0z" fill="#ff8fb0" ${O} stroke-width="2"/>
+    <path d="M62 186 q38 16 76 0 v10 q-38 16 -76 0z" fill="#2f9bb3" ${O} stroke-width="2"/>`),
+};
+
+const IMG = {};
+function preloadImages() {
+  const names = [...Object.keys(SPRITES), 'snow_angry', 'snow_happy'];
+  names.forEach(n => {
+    const im = new Image();
+    im.onload = () => { IMG[n] = im.src; };
+    im.src = `img/${n}.png`;
+  });
+}
+function sprite(id, mood = 'normal') {
+  const k = IMG[`${id}_${mood}`] ? `${id}_${mood}` : id;
+  if (IMG[k]) return `<img src="${IMG[k]}" alt="${WHO[id].name}">`;
+  return SPRITES[id] ? SPRITES[id](mood) : '';
+}
+function moodOf(who, text) {
+  if (who !== 'snow') return 'normal';
+  if (/!!|으아|끄아|부들|쳇|…!|크윽/.test(text) || S.rage >= 70) return 'angry';
+  if (/최고|이거야|완벽|좋아|아꼈다|파티|통 크게|반값/.test(text)) return 'happy';
+  return 'normal';
+}
 
 const CARDS = [
   ['inquiry', 'Inquiry (거래 문의)', '가격·수량·조건을 묻는 첫 연락. 문의만으로는 아무 의무도 생기지 않는다.'],
@@ -788,6 +965,7 @@ function startChapter(i) {
   S.queue = [];
   S.newCards = [];
   S.lastWho = null;
+  S.lastMood = null;
   save();
   hud();
   const ch = CH();
@@ -835,7 +1013,12 @@ function showLine(who, text) {
   if (who === 'n') face.classList.add('hide');
   else {
     face.classList.remove('hide');
-    if (S.lastWho !== who) { face.textContent = w.face; face.classList.remove('pop'); void face.offsetWidth; face.classList.add('pop'); }
+    const mood = moodOf(who, text);
+    if (S.lastWho !== who || S.lastMood !== mood) {
+      face.innerHTML = sprite(who, mood);
+      S.lastMood = mood;
+      face.classList.remove('pop'); void face.offsetWidth; face.classList.add('pop');
+    }
     if (who === 'snow' && (S.rage >= 70 || /!!|으아|끄아/.test(text))) { face.classList.remove('shake'); void face.offsetWidth; face.classList.add('shake'); }
   }
   S.lastWho = who;
@@ -857,7 +1040,7 @@ function showDoc(item) {
 function showChoice(step) {
   const lastSpeaker = S.lastWho && S.lastWho !== 'n' ? WHO[S.lastWho] : null;
   openOverlay(`<div class="card">
-    ${lastSpeaker ? `<div class="who"><span class="f">${lastSpeaker.face}</span>${lastSpeaker.name}</div>` : ''}
+    ${lastSpeaker ? `<div class="who"><span class="f">${sprite(S.lastWho)}</span>${lastSpeaker.name}</div>` : ''}
     <h2>${step.prompt}</h2>
     ${step.options.map((o, i) => `<button class="opt" data-i="${i}"><b>${o.label}</b>${o.sub ? `<small>${o.sub}</small>` : ''}</button>`).join('')}
   </div>`);
@@ -869,7 +1052,7 @@ function cardHtml(id) { return `<div class="tcard"><b>🃏 ${CARD[id].term}</b>$
 function showLesson(text) {
   const nc = S.newCards.splice(0);
   openOverlay(`<div class="card">
-    <div class="who"><span class="f">🐕</span>포피 할아버지의 한 줄</div>
+    <div class="who"><span class="f">${sprite('pops')}</span>포피 할아버지의 한 줄</div>
     <div class="lesson">${text}</div>
     ${nc.length ? `<h3>새로 얻은 카드</h3><div class="newcards">${nc.map(cardHtml).join('')}</div>` : ''}
     <div class="row"><button class="btn" id="ok">계속 ▶</button></div></div>`);
@@ -1000,6 +1183,7 @@ document.addEventListener('keydown', e => {
 $('#btnCards').onclick = showDex;
 $('#btnReset').onclick = () => { if (confirm('처음부터 다시 할까요? 저장된 진행 상황이 지워져요.')) { clearSave(); showTitle(); } };
 
+preloadImages();
 showTitle();
 </script>
 </body>
