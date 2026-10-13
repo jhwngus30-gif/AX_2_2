@@ -32,6 +32,23 @@
 
   document.querySelectorAll('.media').forEach(watchMedia);
 
+  /* ---------- 히어로 배경 영상 ---------- */
+  var heroVideo = document.querySelector('.hero__video');
+  var heroToggle = document.querySelector('.hero__toggle');
+  if (heroVideo && heroToggle) {
+    var setPaused = function (paused) {
+      if (paused) heroVideo.pause(); else heroVideo.play().catch(function () {});
+      heroToggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
+      heroToggle.setAttribute('aria-label', paused ? '배경 영상 재생' : '배경 영상 일시정지');
+    };
+    // 움직임 줄이기 설정이면 첫 장면에 멈춰 둔다
+    if (reduceMotion) { heroVideo.removeAttribute('autoplay'); setPaused(true); }
+    heroToggle.addEventListener('click', function () { setPaused(!heroVideo.paused); });
+    // 영상을 못 불러오면 사진으로 둔다
+    var sources = heroVideo.querySelectorAll('source');
+    sources[sources.length - 1].addEventListener('error', function () { heroVideo.remove(); heroToggle.remove(); });
+  }
+
   /* ---------- 헤더 ---------- */
   var header = document.querySelector('.site-header');
   var toggle = document.querySelector('.menu-toggle');
