@@ -36,6 +36,10 @@
     <section class="hero" aria-label="NOXLUX 소개">
       <figure class="media hero__bg r-16x9" data-file="hero_main.jpg">
         <img src="images/hero_main.jpg" alt="새벽빛이 스미는 침실 협탁 위의 NOXLUX">
+        <video class="hero__video" autoplay muted loop playsinline preload="auto" poster="images/hero_film_poster.jpg" aria-hidden="true">
+          <source src="video/noxlux_film.mp4" type='video/mp4; codecs="avc1.640028"'>
+          <source src="video/noxlux_film.webm" type='video/webm; codecs="vp9"'>
+        </video>
       </figure>
       <div class="wrap hero__inner">
         <p class="hero__brand">NOXLUX</p>
@@ -43,7 +47,10 @@
         <p class="hero__desc">꺼져 있어도, 침실에 놓인 하나의 오브제.</p>
         <a href="product.html" class="btn btn--light">자세히 보기</a>
       </div>
-      <p class="hero__plate wrap"><span>NOXLUX</span>반투명 유리, 스톤웨어</p>
+      <div class="hero__plate wrap">
+        <p><span>NOXLUX</span>반투명 유리, 스톤웨어</p>
+        <button type="button" class="hero__toggle" aria-label="배경 영상 일시정지" aria-pressed="false"></button>
+      </div>
     </section>
 
     <!-- 2. Story -->
