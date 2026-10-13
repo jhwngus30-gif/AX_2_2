@@ -1176,7 +1176,6 @@ main { padding-top: var(--header-h); }
 .distance__labels { display: flex; justify-content: space-between; margin-top: 12px; font-size: 12px; color: var(--sub); }
 
 /* 표 */
-.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 calc(var(--gutter) * -1); padding: 0 var(--gutter); }
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -1186,21 +1185,11 @@ main { padding-top: var(--header-h); }
 .table th, .table td { padding: 16px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 .table thead th { border-bottom: 1px solid var(--ink); font-weight: 600; font-size: 13px; color: var(--sub); white-space: nowrap; }
 .table tbody th { font-weight: 600; white-space: nowrap; }
-.table--compare { min-width: 640px; }
-.table--compare .is-ours { background: rgba(232, 161, 90, 0.1); }
-.table--compare thead .is-ours { color: var(--ink); }
 .table--spec th { width: 120px; color: var(--sub); font-weight: 500; }
 @media (min-width: 640px) { .table--spec th { width: 160px; } }
 @media (max-width: 480px) {
   .tabs a { padding: 14px 8px; font-size: 13px; }
 }
-
-.diff { display: grid; gap: 12px; margin-top: 48px; }
-@media (min-width: 640px) { .diff { grid-template-columns: 1fr 1fr; } }
-.diff__item { padding: 24px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
-.diff__label { font-size: 13px; color: var(--sub); }
-.diff__before { margin-top: 8px; font-size: 14px; color: var(--sub); text-decoration: line-through; text-decoration-color: rgba(138, 133, 128, 0.5); }
-.diff__after { margin-top: 4px; font-size: 16px; font-weight: 600; }
 
 /* 패키지 */
 .package-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 32px; }
