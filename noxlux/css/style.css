@@ -7,7 +7,7 @@
   --fog: #F4F2EE;        /* 배경 안개 화이트 */
   --ink: #2B2B2E;        /* 본문 한밤 차콜 */
   --sub: #8A8580;        /* 보조 텍스트 */
-  --beige: #E6DCCD;      /* 새벽 베이지 */
+  --beige: #EDE6DC;      /* 새벽 베이지 */
   --amber: #E8A15A;      /* 호박빛 */
   --lavender: #B7A7D6;   /* 이완 라벤더 */
   --sand: #CDBFA8;       /* 유지 샌드 */
@@ -413,7 +413,7 @@ main { padding-top: var(--header-h); }
   font-size: clamp(56px, 10vw, 128px);
   font-weight: 500;
   line-height: 1;
-  color: var(--beige);
+  color: #DDD2C2;
   letter-spacing: 0.04em;
 }
 .story__name span { color: var(--sand); }
@@ -558,7 +558,7 @@ main { padding-top: var(--header-h); }
 .design__grid { display: grid; gap: 48px; align-items: center; }
 @media (min-width: 1024px) { .design__grid { grid-template-columns: 1fr 1fr; gap: 96px; } }
 .design__stage { max-width: 560px; width: 100%; margin: 0 auto; }
-.design__stage .media { background: #D3CABD; }
+.design__stage .media { background: #E0D8CC; }
 .swatches { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
 .swatch {
   display: inline-flex;
