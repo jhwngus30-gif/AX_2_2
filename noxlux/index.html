@@ -40,9 +40,10 @@
       <div class="wrap hero__inner">
         <p class="hero__brand">NOXLUX</p>
         <h1 class="hero__slogan">Drift by scent,<br><em>rise by light.</em></h1>
-        <p class="hero__desc">잠들 때는 향으로, 깨어날 때는 빛으로.<br>착용 없이 곁에 두는 침실용 수면 디바이스.</p>
+        <p class="hero__desc">꺼져 있어도, 침실에 놓인 하나의 오브제.</p>
         <a href="product.html" class="btn btn--light">자세히 보기</a>
       </div>
+      <p class="hero__plate wrap"><span>NOXLUX</span>반투명 유리, 스톤웨어</p>
     </section>
 
     <!-- 2. Story -->
@@ -57,7 +58,7 @@
           <h2 class="title">향으로 풀리는 밤,<br>향으로 여는 아침.</h2>
           <p>마사지를 받을 때, 향만으로도 몸이 노곤하게 풀리던 순간이 있습니다.</p>
           <p>좋은 향과 함께 하루를 시작하던 아침도 있습니다.</p>
-          <p>NOXLUX는 이 두 경험을 침실로 옮겼습니다. 잠드는 순간부터 일어나는 순간까지, 하나의 기기로 이어지도록.</p>
+          <p>NOXLUX는 이 두 경험을 침실로 옮겼습니다. 잠드는 순간부터 일어나는 순간까지, 하나의 오브제로 이어지도록.</p>
           <div class="story__moments">
             <div class="moment">
               <p class="moment__time">at night</p>
@@ -178,35 +179,43 @@
     <!-- 5. Design -->
     <section class="section design" id="design">
       <div class="wrap">
-        <div class="design__grid">
-          <div class="design__stage reveal">
-            <figure class="media r-1x1" data-file="product_white.png" id="designImage">
-              <img src="images/product_white.png" alt="NOXLUX 안개 화이트">
-            </figure>
-          </div>
-          <div class="reveal">
-            <span class="eyebrow">Design</span>
-            <h2 class="title">강가의 둥근 조약돌을<br>닮은 오브제.</h2>
-            <p class="lead">화면 없이, 침실의 분위기에 조용히 스며듭니다. 우윳빛 갓 전체가 은은하게 빛납니다.</p>
-            <div class="swatches" role="group" aria-label="색상 선택">
-              <button type="button" class="swatch" style="--chip: #F4F2EE" data-color="white" data-file="product_white.png" data-name="안개 화이트" aria-pressed="true">안개 화이트</button>
-              <button type="button" class="swatch" style="--chip: #EDE6DC" data-color="beige" data-file="product_beige.png" data-name="새벽 베이지" aria-pressed="false">새벽 베이지</button>
-              <button type="button" class="swatch" style="--chip: #2B2B2E" data-color="charcoal" data-file="product_charcoal.png" data-name="한밤 차콜" aria-pressed="false">한밤 차콜</button>
-            </div>
-            <p class="design__current" id="designName" aria-live="polite">안개 화이트</p>
-            <dl class="design__specs">
-              <div><dt>크기</dt><dd>지름 약 14cm, 높이 약 11cm</dd></div>
-              <div><dt>상단부</dt><dd>우윳빛 반투명 갓, 갓 전체가 은은하게 발광</dd></div>
-              <div><dt>하단부</dt><dd>매트한 무광 세라믹 질감 몸체</dd></div>
-              <div><dt>조작</dt><dd>갓을 가볍게 터치하면 조명 켜기, 길게 누르면 알람 끄기</dd></div>
-            </dl>
-          </div>
+        <div class="section-head reveal">
+          <span class="eyebrow">Design</span>
+          <h2 class="title">꺼져 있어도<br>아름다운 오브제.</h2>
+          <p class="lead">반투명 유리 갓과 손으로 빚은 듯한 스톤웨어 몸체.<br>강가의 둥근 조약돌을 닮았습니다.</p>
         </div>
-        <figure class="design__colors reveal">
+        <div class="gallery">
+          <figure class="gallery__item gallery__item--tall reveal">
+            <div class="media r-4x5" data-file="product_styled.jpg">
+              <img src="images/product_styled.jpg" alt="불이 꺼진 채 선반 위에 놓인 NOXLUX" loading="lazy">
+            </div>
+            <figcaption class="plate">
+              <span class="plate__title">꺼져 있어도 예쁜 오브제</span>
+              <span class="plate__meta">반투명 유리, 스톤웨어 · 지름 약 14cm, 높이 약 11cm</span>
+            </figcaption>
+          </figure>
+          <figure class="gallery__item reveal">
+            <div class="media r-1x1" data-file="product_white.png" id="designImage">
+              <img src="images/product_white.png" alt="NOXLUX 안개 화이트" loading="lazy">
+            </div>
+            <figcaption class="plate">
+              <span class="plate__title" id="designName" aria-live="polite">안개 화이트</span>
+              <span class="swatches" role="group" aria-label="색상 선택">
+                <button type="button" class="swatch" style="--chip: #F4F2EE" data-color="white" data-file="product_white.png" data-name="안개 화이트" aria-pressed="true">안개 화이트</button>
+                <button type="button" class="swatch" style="--chip: #EDE6DC" data-color="beige" data-file="product_beige.png" data-name="새벽 베이지" aria-pressed="false">새벽 베이지</button>
+                <button type="button" class="swatch" style="--chip: #2B2B2E" data-color="charcoal" data-file="product_charcoal.png" data-name="한밤 차콜" aria-pressed="false">한밤 차콜</button>
+              </span>
+            </figcaption>
+          </figure>
+        </div>
+        <figure class="gallery__wide reveal">
           <div class="media r-3x2" data-file="product_colors.jpg">
             <img src="images/product_colors.jpg" alt="NOXLUX 색상 3종" loading="lazy">
           </div>
-          <figcaption class="caption">안개 화이트 · 새벽 베이지 · 한밤 차콜</figcaption>
+          <figcaption class="plate">
+            <span class="plate__title">세 가지 색</span>
+            <span class="plate__meta">안개 화이트 · 새벽 베이지 · 한밤 차콜</span>
+          </figcaption>
         </figure>
       </div>
     </section>

@@ -396,6 +396,21 @@ main { padding-top: var(--header-h); }
   letter-spacing: -0.01em;
 }
 .hero__slogan em { font-style: italic; font-weight: 400; }
+.hero__plate {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgba(244, 242, 238, 0.72);
+}
+.hero__plate span { font-family: var(--font-en); font-size: 14px; letter-spacing: 0.2em; }
+@media (max-width: 640px) { .hero__plate { justify-content: flex-start; } .hero__inner { padding-bottom: 96px; } }
 .hero__desc {
   margin: 24px 0 40px;
   max-width: 460px;
@@ -553,12 +568,21 @@ main { padding-top: var(--header-h); }
 }
 .feature__effect::before { content: "— "; color: var(--sub); }
 
-/* ---------- Design ---------- */
+/* ---------- Design : 갤러리 ---------- */
 .design { background: var(--beige); }
-.design__grid { display: grid; gap: 48px; align-items: center; }
-@media (min-width: 1024px) { .design__grid { grid-template-columns: 1fr 1fr; gap: 96px; } }
-.design__stage { max-width: 560px; width: 100%; margin: 0 auto; }
-.design__stage .media { background: #E0D8CC; }
+.design .media { background: #E0D8CC; }
+.gallery { display: grid; gap: 56px; align-items: end; }
+@media (min-width: 768px) {
+  .gallery { grid-template-columns: 7fr 5fr; gap: 48px; }
+  .gallery--pair { grid-template-columns: 1fr 1fr; gap: 24px; }
+}
+@media (min-width: 1024px) { .design .gallery { gap: 96px; } }
+.gallery__wide { margin-top: 72px; }
+@media (min-width: 1024px) { .design .gallery__wide { margin-top: 120px; width: 72%; margin-left: auto; } }
+/* 갤러리 액자처럼: 모서리를 거의 세우고 여백으로 숨 쉬게 */
+.gallery .media, .gallery__wide .media { border-radius: 4px; }
+
+/* 색상 선택 (index Design · product 구매 영역 공용) */
 .swatches { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
 .swatch {
   display: inline-flex;
@@ -576,17 +600,30 @@ main { padding-top: var(--header-h); }
   content: "";
   width: 28px;
   height: 28px;
-  border-radius: 50%;
   background: var(--chip);
   border: 1px solid rgba(43, 43, 46, 0.18);
 }
 .swatch[aria-pressed="true"], .swatch:has(input:checked) { border-color: var(--ink); background: rgba(255, 255, 255, 0.4); }
 .swatch input { position: absolute; opacity: 0; pointer-events: none; }
-.design__current { margin-top: 20px; font-size: 18px; font-weight: 500; }
-.design__specs { margin-top: 40px; display: grid; gap: 0; border-top: 1px solid var(--line); }
-.design__specs div { display: grid; grid-template-columns: 88px 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
-.design__specs dt { color: var(--sub); }
-.design__colors { margin-top: 80px; }
+
+/* 전시 라벨 */
+.plate {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  max-width: 360px;
+}
+.plate__title { font-size: 14px; font-weight: 500; }
+.plate__meta { font-size: 12px; color: var(--sub); letter-spacing: 0.01em; }
+.plate .swatches { margin-top: 12px; gap: 8px; }
+.plate .swatch { font-size: 13px; padding-right: 14px; }
+.plate .swatch::before { width: 22px; height: 22px; }
+
+/* 손으로 빚은 듯 살짝 고르지 않은 원 */
+.swatch::before, .feature__mark { border-radius: 52% 48% 55% 45% / 47% 53% 47% 53%; }
 
 /* ---------- Science ---------- */
 .science__groups { display: grid; gap: 56px; }
